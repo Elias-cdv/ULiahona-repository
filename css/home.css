@@ -1,0 +1,149 @@
+/* =========================================================
+   HOME.CSS — Estilos exclusivos del Home (solo <main>)
+   ========================================================= */
+
+:root{
+    --primary: #0b5560;
+    --accent:  #d4a017;
+    --muted:   #f6f7f8;
+    --text:    #233238;
+    --card:    #ffffff;
+    --glass:   rgba(255,255,255,0.6);
+    --shadow:  0 6px 18px rgba(18,34,48,0.08);
+}
+
+/* =========================================================
+   PROGRESS SECTION (left)
+   ========================================================= */
+
+.progress-area {
+    background: var(--card);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+#progress-section {
+    background: linear-gradient(180deg, var(--muted), transparent);
+    padding: 18px;
+    border-radius: 10px;
+    color: var(--text);
+    margin-bottom: 18px;
+}
+
+.progress-card {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin: 10px 0 6px 0;
+}
+
+.progress-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--off-white);
+    border-radius: 8px;
+    min-height: 140px;
+}
+
+.progress-bar {
+    flex:1;
+    height: 14px;
+    background: linear-gradient(90deg, rgba(11,85,96,0.08), rgba(11,85,96,0.04));
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height:100%;
+    width:0%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: width 520ms cubic-bezier(.2,.9,.3,1);
+    border-radius: 999px;
+}
+
+.progress-meta {
+    width:64px;
+    text-align:right;
+    font-weight:600;
+    color:var(--primary);
+}
+
+/* =========================================================
+   QUOTE SECTION (right)
+   ========================================================= */
+
+.quote-area {
+    background: var(--card);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+#quote-section {
+    padding: 16px;
+    background: var(--card);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    margin-bottom: 18px;
+}
+
+.quote-card-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:8px;
+}
+
+.quote-card blockquote {
+    font-style: italic;
+    color: #1d2b2f;
+    margin-bottom: 6px;
+    line-height:1.4;
+}
+
+.quote-author {
+    font-size:0.9rem;
+    color:#6b7075;
+}
+
+.quote-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--deep-blue);
+    color: var(--off-white);
+    border-radius: 8px;
+    min-height: 140px;
+}
+
+/* =========================================================
+   CHOOSE SCRIPTURE (bottom)
+   ========================================================= */
+
+.choose-scripture {
+    grid-column: span 2;
+    background: var(--card);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.scripture-grid {
+    margin-top: 1rem;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* animación del logo exclusiva de home */
+#app-logo.logo-pulse {
+    animation: logoPulse 420ms ease;
+}
+
+@keyframes logoPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}

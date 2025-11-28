@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULiahona | Home</title>
+
+    <!-- SEO Essentials -->
+    <meta name="description" content="ULiahona is your personalized spiritual study guide. Track your progress, get daily inspiration, and choose your favorite scriptures.">
+    <meta name="keywords" content="ULiahona, scripture study, Bible, Book of Mormon, Doctrine and Covenants, Pearl of Great Price, daily quote, spiritual progress">
+    <meta name="author" content="ULiahona Team">
+
+    <!-- Favicon -->
+    <link rel="icon" href="assets/images/liahona.png" type="image/x-icon">
+
+    <!-- CSS global--> 
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css"> 
+    <link rel="stylesheet" href="css/home.css"> 
+
+    <!--LINKS FOR ICONS-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
+<body class="home">
+    <!-- =============================== -->
+    <!--   SIDEBAR DE NAVEGACIÓN        -->
+    <!-- =============================== -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img id="app-logo" src="assets/images/liahona.png" class="book-cover" loading="lazy" alt="ULiahona logo">
+            <h1 class="app-title">ULiahona</h1>
+        </div>
+
+        <nav class="nav">
+            <a href="index.html" class="nav-link" title="Home">
+                <span class="material-symbols-outlined nav-icon">home</span>
+            </a>
+            <a href="reader.html" class="nav-link" title="Reading">
+                <span class="material-symbols-outlined nav-icon">menu_book</span>
+            </a>
+            <a href="searching.html" class="nav-link" title="Search">
+                <span class="material-symbols-outlined nav-icon">search</span>
+            </a>
+            <a href="settings.html" class="nav-link" title="Settings">
+                <span class="material-symbols-outlined nav-icon">settings</span>
+            </a>
+        </nav>
+    </aside>
+    <!-- =============================== -->
+    <!--            CONTENIDO           -->
+    <!-- =============================== -->
+    <main class="content">
+
+        <!-- ===== PROGRESS OF STUDY (IZQUIERDA) ===== -->
+        <section class="progress-area" id="progress-section">
+            <h2>Progress of study</h2>
+            <!-- Aquí aparece el estado del libro -->
+            <div id="progress-container" class="progress-box">
+                <!-- 1) Si NO hay libro cargado:
+                    <p class="no-book">Choose a book ↓</p>
+
+                    2) Si hay libro cargado (ejemplo):
+                    <div class="book-info">
+                        <img src="assets/img/bom.png" class="book-cover">
+                        <p>Book of Mormon – 23%</p>
+                        <p class="motivation">"Great job! Keep going"</p>
+                    </div>
+                -->
+            </div>
+
+        </section>
+        <!-- ===== QUOTE OF THE DAY (DERECHA) ===== -->
+        <section class="quote-area" id="quote-section">
+            <!-- El contenedor se llena aquí desde el controlador -->
+            <p>Loading quote...</p>
+        </section>
+        <!-- ===== CHOOSE A SCRIPTURE (ABAJO) ===== -->
+        <section class="choose-scripture" id="choose-scripture">
+            <h2>Choose a scripture</h2>
+            <div class="scripture-grid">
+                <!-- Cada imagen creará el plan de estudio -->
+                <!--20 de nov buscar imagenes para irlas agregando-->
+
+            </div>
+
+        </section>
+
+    </main>
+    <!-- =============================== -->
+    <!--              JS                 -->
+    <!-- =============================== -->
+    <script type="module" src="js/app.js"></script> 
+
+    <!-- MOBILE NAVBAR (reemplaza sidebar en pantallas pequeñas) -->
+    <div class="mobile-nav">
+        <a href="index.html" title="Home">
+            <span class="material-symbols-outlined nav-icon">home</span>
+        </a>
+        <a href="reader.html" title="Reading">
+            <span class="material-symbols-outlined nav-icon">menu_book</span>
+        </a>
+        <a href="searching.html" title="Search">
+            <span class="material-symbols-outlined nav-icon">search</span>
+        </a>
+        <a href="settings.html" title="Settings">
+            <span class="material-symbols-outlined nav-icon">settings</span>
+        </a>
+    </div>
+ </body>
+ </html>

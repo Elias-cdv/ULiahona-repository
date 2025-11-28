@@ -1,0 +1,37 @@
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.nav-link:focus,
+.nav-link:hover {
+    background: rgba(10,26,47,0.06);
+    transform: translateY(-2px);
+}
+
+.nav-icon {
+    font-variation-settings: 'wght' 500;
+    font-size: 24px; /* ajusta al tamaño deseado */
+    color: var(--deep-blue);
+    line-height: 1;
+}
+
+/* estado activo (ejemplo) */
+.nav-link.active .nav-icon {
+    color: var(--gold);
+    transform: scale(1.05);
+}
