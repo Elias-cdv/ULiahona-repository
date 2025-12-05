@@ -19,3 +19,5 @@ export async function loadScripture(fileName) {
         return null; // ← Importante: devolver null en caso de error
     }
 }
+
+//Declarar variables del DOM
