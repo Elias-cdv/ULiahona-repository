@@ -238,7 +238,72 @@ function showChapters(bookData) {
     }
 }
 
+/*La función showChapter tiene como objetivo mostrar el contenido del capitulo, ejemplo
+    si el usuario hace click en 1 Mosiah 1, se muestra el capitulo 1 de mosiah en el reader container*/
 
+function showChapterContent(bookName, chapterData) {
+    console.log("Mostrando contenido de:", bookName, "- Chapter", chapterData.chapter);
+    
+    try {
+        // ===== 1. OBTENER LOS ELEMENTOS DEL DOM =====
+        const scriptureTitle = document.getElementById("scripture-title");
+        const chaptersContainer = document.getElementById("chapters-container");
+        const scriptureContent = document.getElementById("scripture-content");
+        
+        // Verificar que existen
+        if (!scriptureTitle || !chaptersContainer || !scriptureContent) {
+            console.error("No se encontraron los elementos del DOM");
+            return;
+        }
+        
+        console.log("Elementos del DOM encontrados");
+        
+        // ===== 2. OCULTAR LA LISTA DE CAPÍTULOS =====
+        chaptersContainer.classList.add("hidden");
+        console.log("Lista de capitulos ocultada");
+        
+        // ===== 3. MOSTRAR EL CONTENEDOR DE CONTENIDO =====
+        scriptureContent.classList.remove("hidden");
+        console.log("Contenedor de contenido visible");
+        
+        // ===== 4. CAMBIAR EL TÍTULO =====
+        scriptureTitle.innerHTML = `<h2>${bookName} - Chapter ${chapterData.chapter}</h2>`;
+        console.log("Titulo cambiado");
+        
+        // ===== 5. LIMPIAR EL CONTENEDOR =====
+        scriptureContent.innerHTML = "";
+        console.log("Contenedor limpiado");
+        
+        // ===== 6. VERIFICAR QUE TIENE VERSÍCULOS =====
+        if (!chapterData.verses || chapterData.verses.length === 0) {
+            console.error("Este capitulo no tiene versiculos");
+            scriptureContent.innerHTML = "<p>No verses available</p>";
+            return;
+        }
+        
+        console.log("Mostrando", chapterData.verses.length, "versiculos...");
+        
+        // ===== 7. CREAR EL HTML DE TODOS LOS VERSÍCULOS =====
+        let versesHTML = "";
+        
+        chapterData.verses.forEach((verseData) => {
+            versesHTML += `
+                <p class="verse">
+                    <strong>${verseData.verse}</strong> ${verseData.text}
+                </p>
+            `;
+        });
+        
+        // Insertar todos los versículos de una vez
+        scriptureContent.innerHTML = versesHTML;
+        
+        console.log("Todos los versiculos mostrados");
+        
+    } catch (error) {
+        console.error("ERROR al mostrar contenido:", error);
+        console.error("Stack trace:", error.stack);
+    }
+}
 /*  Fue una función de prueba para cargar datos json en el reader container
     Usaré solamente book of mormon por ahora
     Si la prueba es exitosa, diseñare un algoritmo para que funcione 
