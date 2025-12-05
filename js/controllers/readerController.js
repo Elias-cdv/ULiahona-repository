@@ -40,12 +40,20 @@ function renderScriptureList(container) {
             <img src="${scr.img}" alt="${scr.name}" class="scripture-thumb">
             <span class="scripture-name">${scr.name}</span>
         `;
+        
+        // PRUEBA: Agregar listener solo a book of mormon
+        if (scr.file === "book-of-mormon.json"){
+            item.addEventListener("click", () => {
+                item.addEventListener("click", () => {
 
-        // Por ahora, NO hay listener de click
-        // Solo mostramos las imágenes
+                console.log("Click en book of mormon")});//prueba exitosa, la consola en devtools mostró el mensaje
+
+            });
+        }
 
         container.appendChild(item);
     });
 
     console.log("✅ Scripture images rendered");
 }
+

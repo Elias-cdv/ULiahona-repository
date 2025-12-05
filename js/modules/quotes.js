@@ -1,8 +1,9 @@
-/**
- * Obtiene una cita aleatoria en inglés de APIs con CORS habilitado.
- * @param {string | null} [excludeText=null] - Texto a evitar devolver.
- * @returns {Promise<{text: string, author: string} | null>}
- */
+/*========================
+     INTEGRACIÓN DE API
+  =========================*/
+
+/*Al principio solo use zenquotes, no cargó, investigue otras dos APIs, utilicé el mismo algoritmo, y ahora se llaman a 3
+APIs para evitar fallas y caídas */
 export async function fetchQuote(excludeText = null) {
     
     // API 1: Quotable (buena, pero a veces lento)
