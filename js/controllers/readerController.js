@@ -137,6 +137,11 @@ async function loadBookOfMormon() {
             // Por ahora solo mostramos, después agregaremos el click
             console.log(`  ${index + 1}. ${bookData.book} (${bookData.chapters.length} capítulos)`);
             
+            //Se agrega un Listener de click, para reconocer el click de uno de los libros
+            bookItem.addEventListener("click", () => {
+                console.log("Click en: ", bookData.book);
+                showChapters(bookData); //esto llama a una nueva función
+            })
             // Agregar al contenedor
             booksContainer.appendChild(bookItem);
         });
@@ -146,6 +151,90 @@ async function loadBookOfMormon() {
     } catch (error) {
         console.error("ERROR al cargar:", error);
         console.error("Stack trace:", error.stack);
+    }
+}
+
+//Nueva función para mostrar los capitulos. Utiliza una lógica parecida a loadBookOfMormon
+
+
+function showChapters(bookData) {
+    console.log("Mostrando capitulos de: ", bookData.book);
+
+    try {
+        //obtener elementos de DOM
+        const scriptureTitle = document.getElementById("scripture-title");
+        const booksContainer = document.getElementById("books-container");
+        const chaptersContainer = document.getElementById("chapters-container");
+
+        //ver si existen o no
+        if (!scriptureTitle || !booksContainer || !chaptersContainer){
+            console.error("No se encontraron los elementos del DOM");
+            return;
+        }
+
+        console.log("Elementos del DOM encontrados");
+
+        //ocultar lista de libros
+        booksContainer.classList.add("hidden");
+        console.log("Lista de libros ocultada");
+
+        //mostrar los capitulos, usando "remove"
+        chaptersContainer.classList.remove("hidden");
+        console.log("Contenedor de capitulos visible");
+        
+        //Cambiar titulo al nombre del libro
+        scriptureTitle.innerHTML = `<h2>${bookData.book}</h2>`;
+        console.log("Titulo cambiado a: ", bookData.book);
+
+        //limpiar los capitulos
+        chaptersContainer.innerHTML = "";
+        console.log("Contenedor de capitulos limpiado");
+
+        if (!bookData.chapters || bookData.chapters.length === 0){
+            console.error("Este libro no tiene capitulos");
+            chaptersContainer.innerHTML = "<p>No chapters available</p>";
+            return;
+        }
+        
+        console.log("Creando", bookData.chapters.length, "botones de capitulos...");
+
+        // Crear el HTML de todos los botones
+        let chaptersHTML = "";
+
+        bookData.chapters.forEach((chapterData) => {
+            chaptersHTML += `<button class="chapter-button" data-chapter="${chapterData.chapter}">${chapterData.chapter}</button>`;
+        });
+
+        // Insertar todos los botones de una vez
+        chaptersContainer.innerHTML = chaptersHTML;
+        console.log("Botones insertados con innerHTML");
+
+        // Buscar todos los botones que acabamos de crear
+        const chapterButtons = chaptersContainer.querySelectorAll(".chapter-button");
+        console.log("Botones encontrados:", chapterButtons.length);
+
+        // Agregar listener a cada botón
+        chapterButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const chapterNumber = parseInt(button.getAttribute("data-chapter"));
+                console.log("Click en capitulo:", chapterNumber);
+                
+                // Buscar los datos del capítulo
+                const chapterData = bookData.chapters.find(ch => ch.chapter === chapterNumber);
+                
+                if (chapterData) {
+                    showChapterContent(bookData.book, chapterData);
+                } else {
+                    console.error("No se encontraron datos para el capitulo", chapterNumber);
+                }
+            });
+        });
+
+        console.log("Listeners agregados a los botones");
+
+    } catch (error){
+        console.error("ERROR al mostrar capitulos: ", error);
+        console.error("Stack trace: ", error.stack);
     }
 }
 
