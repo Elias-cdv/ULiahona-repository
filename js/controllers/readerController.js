@@ -1,8 +1,16 @@
 //===========================
 //   READER CONTROLLER (VERSIÓN MÍNIMA)
 //===========================
-
 import { loadScripture } from "../modules/chapters.js";
+
+let currentScripture = {
+    file: null, 
+    name: null, 
+    data: null,
+    structureType: null, 
+    currentBookIndex: null, // indice del libro actual
+    currentChapterIndex: null //indice del capitulo actual
+};
 
 export function initReader() {
     console.log("✅ Reader controller loaded");
@@ -42,24 +50,18 @@ function renderScriptureList(container) {
             <span class="scripture-name">${scr.name}</span>
         `;
 
-        // PRUEBA: Agregar listener solo a book of mormon
-        if (scr.file === "book-of-mormon.json"){
-            item.addEventListener("click", () => {
-                item.addEventListener("click", () => {
-
-                console.log("Click en book of mormon")});//prueba exitosa, la consola en devtools mostró el mensaje
-                loadBookOfMormon(); //se agregó esta linea para conectar listener con la función de abajo
-            });
-        }
-
+        // Ahora funciona con todas las escrituras, no uso if
+        item.addEventListener ("click", () => {
+            loadScriptureBooks(scr.file, scr.name);
+        });
         container.appendChild(item);
     });
 
     console.log("✅ Scripture images rendered");
 }
 
-async function loadBookOfMormon() {
-    console.log("🔄 Iniciando carga de Book of Mormon...");
+async function loadScriptureBooks(file, name) {
+    console.log("🔄 Iniciando carga de:", name);
     
     try {
         // ===== 1. OBTENER LOS ELEMENTOS DEL DOM =====
@@ -67,9 +69,8 @@ async function loadBookOfMormon() {
         const booksContainer = document.getElementById("books-container");
         const readingWelcome = document.getElementById("reading-welcome");
         
-        // Verificar que existen
         if (!scriptureTitle || !booksContainer) {
-            console.error(" No se encontraron los elementos del DOM");
+            console.error("No se encontraron los elementos del DOM");
             return;
         }
         
@@ -83,70 +84,119 @@ async function loadBookOfMormon() {
         // ===== 3. MOSTRAR LOS CONTENEDORES =====
         scriptureTitle.classList.remove("hidden");
         booksContainer.classList.remove("hidden");
+
+        // ===== 3.5 OCULTAR Y LIMPIAR CONTENIDO ANTERIOR =====
+        const chaptersContainer = document.getElementById("chapters-container");
+        const scriptureContent = document.getElementById("scripture-content");
+
+        if (chaptersContainer){
+            chaptersContainer.classList.add("hidden");
+            chaptersContainer.innerHTML = "";
+        }
+        if (scriptureContent){
+            scriptureContent.classList.add("hidden");
+            scriptureContent.innerHTML = "";
+        }
         
-        console.log("✅ Contenedores visibles");
+        console.log("Contenido anterior limpiado");
+        console.log("Contenedores visibles");
         
         // ===== 4. CARGAR EL JSON =====
-        console.log("Llamando a loadScripture('book-of-mormon.json')...");
+        console.log("Llamando a loadScripture con:", file);
         
-        const data = await loadScripture("book-of-mormon.json");
+        const data = await loadScripture(file);
         
-        console.log("JSON recibido:");
-        console.log(data);
+        console.log("JSON recibido:", data);
         
         // ===== 5. VERIFICAR QUE LLEGÓ ALGO =====
         if (!data) {
             console.error("No se recibió data");
             scriptureTitle.innerHTML = "<h2>Error al cargar</h2>";
-            booksContainer.innerHTML = "<p>No se pudo cargar el Book of Mormon</p>";
+            booksContainer.innerHTML = `<p>No se pudo cargar ${name}</p>`;
             return;
         }
         
         console.log("Data recibida correctamente");
         
-        // ===== 6. VERIFICAR ESTRUCTURA =====
-        if (!data.books || !Array.isArray(data.books)) {
-            console.error("El JSON no tiene 'books' o no es un array");
+        // ===== 6. DETECTAR ESTRUCTURA (books vs sections) =====
+        let itemsToShow = [];
+        let structureType = "";
+        
+        if (data.books && Array.isArray(data.books)) {
+            // Estructura normal: books → chapters
+            itemsToShow = data.books;
+            structureType = "books";
+            console.log("✅ Estructura detectada: BOOKS (con chapters)");
+        } else if (data.sections && Array.isArray(data.sections)) {
+            // Estructura de D&C: sections directas
+            itemsToShow = data.sections;
+            structureType = "sections";
+            console.log("✅ Estructura detectada: SECTIONS (sin chapters intermedios)");
+        } else {
+            console.error("❌ Estructura desconocida. No tiene 'books' ni 'sections'");
+            console.log("🔍 Propiedades disponibles:", Object.keys(data));
             return;
         }
         
-        console.log("El JSON tiene", data.books.length, "libros");
+        console.log(`📚 Total de ${structureType}:`, itemsToShow.length);
         
-        // ===== 7. MOSTRAR EL TÍTULO =====
-        scriptureTitle.innerHTML = "<h2>📖 Book of Mormon</h2>";
-        console.log("Título mostrado");
+        // ===== 7. GUARDAR EN ESTADO GLOBAL =====
+        currentScripture.file = file;
+        currentScripture.name = name;
+        currentScripture.data = data;
+        currentScripture.structureType = structureType; // ← Nuevo: guardar el tipo
+        console.log("Estado guardado:", currentScripture);
         
-        // ===== 8. LIMPIAR EL CONTENEDOR DE LIBROS =====
+        // ===== 8. MOSTRAR EL TÍTULO =====
+        scriptureTitle.innerHTML = `<h2>📖 ${name}</h2>`;
+        console.log("Título mostrado:", name);
+        
+        // ===== 9. LIMPIAR EL CONTENEDOR =====
         booksContainer.innerHTML = "";
         console.log("Contenedor limpiado");
         
-        // ===== 9. CREAR Y MOSTRAR CADA LIBRO =====
-        console.log("Creando elementos para", data.books.length, "libros...");
+        // ===== 10. CREAR Y MOSTRAR CADA ITEM =====
+        console.log("Creando elementos para", itemsToShow.length, "items...");
         
-        data.books.forEach((bookData, index) => {
-            // Crear el elemento div para cada libro
+        itemsToShow.forEach((itemData, index) => {
             const bookItem = document.createElement("div");
             bookItem.classList.add("book-item");
             
-            // Agregar el contenido (nombre del libro)
-            bookItem.innerHTML = `
-                <span class="book-name">${bookData.book}</span>
-                <span class="book-chapters">${bookData.chapters.length} chapters</span>
-            `;
+            // Adaptar según la estructura
+            if (structureType === "books") {
+                // Books tienen chapters
+                bookItem.innerHTML = `
+                    <span class="book-name">${itemData.book}</span>
+                    <span class="book-chapters">${itemData.chapters.length} chapters</span>
+                `;
+                
+                bookItem.addEventListener("click", () => {
+                    console.log("Click en libro:", itemData.book);
+                    showChapters(itemData);
+                });
+                
+                console.log(`  ${index + 1}. ${itemData.book} (${itemData.chapters.length} chapters)`);
+                
+            } else if (structureType === "sections") {
+                // Sections NO tienen chapters, van directo a verses
+                bookItem.innerHTML = `
+                    <span class="book-name">${itemData.reference}</span>
+                    <span class="book-chapters">${itemData.verses.length} verses</span>
+                `;
+                
+                bookItem.addEventListener("click", () => {
+                    console.log("Click en section:", itemData.reference);
+                    // Llamar directamente a showChapterContent (saltamos showChapters)
+                    showChapterContent(name, itemData);
+                });
+                
+                console.log(`  ${index + 1}. ${itemData.reference} (${itemData.verses.length} verses)`);
+            }
             
-            // Por ahora solo mostramos, después agregaremos el click
-            console.log(`  ${index + 1}. ${bookData.book} (${bookData.chapters.length} capítulos)`);
-            
-            //Se agrega un Listener de click, para reconocer el click de uno de los libros
-            bookItem.addEventListener("click", () => {
-                console.log("Click en: ", bookData.book);
-                showChapters(bookData); //esto llama a una nueva función
-            })
-            // Agregar al contenedor
             booksContainer.appendChild(bookItem);
         });
         
-        console.log("✅ Todos los libros mostrados en pantalla");
+        console.log("✅ Todos los items mostrados");
         
     } catch (error) {
         console.error("ERROR al cargar:", error);
@@ -155,17 +205,21 @@ async function loadBookOfMormon() {
 }
 
 //Nueva función para mostrar los capitulos. Utiliza una lógica parecida a loadBookOfMormon
-
-
 function showChapters(bookData) {
     console.log("Mostrando capitulos de: ", bookData.book);
 
     try {
         //obtener elementos de DOM
         const scriptureTitle = document.getElementById("scripture-title");
-        const booksContainer = document.getElementById("books-container");
+        const booksContainer = document.getElementById("books-container");        // ← YA LO TIENES
         const chaptersContainer = document.getElementById("chapters-container");
 
+        //guardar indice del libro actual
+        const bookIndex = currentScripture.data.books.findIndex(b => b.book === bookData.book);
+        currentScripture.currentBookIndex = bookIndex;
+        currentScripture.currentChapterIndex = null; // Resetear capítulo
+        console.log("📍 Libro guardado en índice:", bookIndex);
+        
         //ver si existen o no
         if (!scriptureTitle || !booksContainer || !chaptersContainer){
             console.error("No se encontraron los elementos del DOM");
@@ -175,7 +229,7 @@ function showChapters(bookData) {
         console.log("Elementos del DOM encontrados");
 
         //ocultar lista de libros
-        booksContainer.classList.add("hidden");
+        booksContainer.classList.add("hidden");                                    // ← YA LO TIENES
         console.log("Lista de libros ocultada");
 
         //mostrar los capitulos, usando "remove"
@@ -234,57 +288,82 @@ function showChapters(bookData) {
 
     } catch (error){
         console.error("ERROR al mostrar capitulos: ", error);
-        console.error("Stack trace: ", error.stack);
+        console.error("Stack trace:", error.stack);
     }
 }
 
-/*La función showChapter tiene como objetivo mostrar el contenido del capitulo, ejemplo
-    si el usuario hace click en 1 Mosiah 1, se muestra el capitulo 1 de mosiah en el reader container*/
-
 function showChapterContent(bookName, chapterData) {
-    console.log("Mostrando contenido de:", bookName, "- Chapter", chapterData.chapter);
+    console.log("Mostrando contenido de:", bookName, "- Chapter/Section", chapterData.chapter || chapterData.section);
     
     try {
         // ===== 1. OBTENER LOS ELEMENTOS DEL DOM =====
         const scriptureTitle = document.getElementById("scripture-title");
+        const booksContainer = document.getElementById("books-container");
         const chaptersContainer = document.getElementById("chapters-container");
         const scriptureContent = document.getElementById("scripture-content");
         
-        // Verificar que existen
-        if (!scriptureTitle || !chaptersContainer || !scriptureContent) {
+        if (!scriptureTitle || !booksContainer || !chaptersContainer || !scriptureContent) {
             console.error("No se encontraron los elementos del DOM");
             return;
         }
         
         console.log("Elementos del DOM encontrados");
         
-        // ===== 2. OCULTAR LA LISTA DE CAPÍTULOS =====
-        chaptersContainer.classList.add("hidden");
-        console.log("Lista de capitulos ocultada");
+        // ===== 2. GUARDAR ÍNDICE DEL CAPÍTULO ACTUAL =====
+        if (currentScripture.structureType === "books") {
+            // Para books normales
+            const currentBook = currentScripture.data.books[currentScripture.currentBookIndex];
+            const chapterIndex = currentBook.chapters.findIndex(ch => ch.chapter === chapterData.chapter);
+            currentScripture.currentChapterIndex = chapterIndex;
+            console.log("📍 Capítulo guardado en índice:", chapterIndex);
+        } else if (currentScripture.structureType === "sections") {
+            // Para sections de D&C
+            const sectionIndex = currentScripture.data.sections.findIndex(s => s.section === chapterData.section);
+            currentScripture.currentBookIndex = sectionIndex; // En D&C, el section ES el book
+            currentScripture.currentChapterIndex = 0; // Las sections no tienen chapters
+            console.log("📍 Section guardada en índice:", sectionIndex);
+        }
         
-        // ===== 3. MOSTRAR EL CONTENEDOR DE CONTENIDO =====
+        // ===== 3. OCULTAR TODO LO ANTERIOR =====
+        booksContainer.classList.add("hidden");
+        chaptersContainer.classList.add("hidden");
+        console.log("Lista de libros/secciones y capítulos ocultados");
+        
+        // ===== 4. MOSTRAR EL CONTENEDOR DE CONTENIDO =====
         scriptureContent.classList.remove("hidden");
         console.log("Contenedor de contenido visible");
         
-        // ===== 4. CAMBIAR EL TÍTULO =====
-        scriptureTitle.innerHTML = `<h2>${bookName} - Chapter ${chapterData.chapter}</h2>`;
+        // ===== 5. CAMBIAR EL TÍTULO =====
+        const chapterNumber = chapterData.chapter || chapterData.section;
+        const label = chapterData.chapter ? "Chapter" : "Section";
+        
+        scriptureTitle.innerHTML = `<h2>${bookName} - ${label} ${chapterNumber}</h2>`;
         console.log("Titulo cambiado");
         
-        // ===== 5. LIMPIAR EL CONTENEDOR =====
+        // ===== 6. LIMPIAR EL CONTENEDOR =====
         scriptureContent.innerHTML = "";
         console.log("Contenedor limpiado");
         
-        // ===== 6. VERIFICAR QUE TIENE VERSÍCULOS =====
+        // ===== 7. VERIFICAR QUE TIENE VERSÍCULOS =====
         if (!chapterData.verses || chapterData.verses.length === 0) {
-            console.error("Este capitulo no tiene versiculos");
+            console.error("Este capitulo/section no tiene versiculos");
             scriptureContent.innerHTML = "<p>No verses available</p>";
             return;
         }
         
         console.log("Mostrando", chapterData.verses.length, "versiculos...");
         
-        // ===== 7. CREAR EL HTML DE TODOS LOS VERSÍCULOS =====
-        let versesHTML = "";
+        // ===== 8. CREAR BOTONES DE NAVEGACIÓN =====
+        const navigationHTML = `
+            <div class="navigation-buttons">
+                <button id="back-to-books" class="nav-btn">Back to Books</button>
+                <button id="prev-chapter" class="nav-btn">Previous</button>
+                <button id="next-chapter" class="nav-btn">Next</button>
+            </div>
+        `;
+        
+        // ===== 9. CREAR EL HTML DE TODOS LOS VERSÍCULOS =====
+        let versesHTML = navigationHTML; // Botones arriba
         
         chapterData.verses.forEach((verseData) => {
             versesHTML += `
@@ -294,65 +373,146 @@ function showChapterContent(bookName, chapterData) {
             `;
         });
         
-        // Insertar todos los versículos de una vez
+        versesHTML += navigationHTML; // Botones abajo también
+        
+        // Insertar todo el contenido
         scriptureContent.innerHTML = versesHTML;
         
-        console.log("Todos los versiculos mostrados");
+        console.log("Todos los versiculos y botones mostrados");
+        
+        // ===== 10. AGREGAR FUNCIONALIDAD A LOS BOTONES =====
+        setupNavigationButtons();
         
     } catch (error) {
         console.error("ERROR al mostrar contenido:", error);
         console.error("Stack trace:", error.stack);
     }
 }
-/*  Fue una función de prueba para cargar datos json en el reader container
-    Usaré solamente book of mormon por ahora
-    Si la prueba es exitosa, diseñare un algoritmo para que funcione 
-    con todas las escrituras 
-
-async function loadBookOfMormon() {
-    console.log("Iniciando la carga de Book of Mormon");
-
-    try {
-        // Cargar el json
-        console.log("Llamando a loadScripture('book-of-mormon.json')...");
-
-        const data = await loadScripture("book-of-mormon.json");
-
-        console.log("Json recibido!");
-        console.log(data);
-
-        if (!data){
-            console.error("No se recibio data");
-            return;
-        }
-
-        console.log("Data recibida correctamente");
-
-        //Está sentencia if verifica que datos tiene el JSON,
-          desconocia el "Object.keys", la IA me la mostró, es 
-          util para obtener datos de un json, incluso de una API
-          
-          nota: La usaré en otras prácticas
-        if (!data.books){
-            console.error("El json no tiene la propiedad books");
-            console.log("Propiedades que si tiene: ", Object.keys(data));
-            return;
-        }
-
-        console.log("El json tiene 'books'");
-        console.log("Total de libros: ", data.books.length);
-
-        /*Estamos verificando que todo funcione, para ello mostraremos
-          los primeros 5 libros, debería mostrarse 1 Nephi, 2 Nephi, Jacob, 
-          Jarom y Omni
-        console.log("Primeros cinco libros: ");
-        data.books.slice(0, 5).forEach((book, index) => {
-            console.log(`${index + 1}. ${book.book}`);
+// función para navegación  de botones
+function setupNavigationButtons() {
+    // Obtener los botones
+    const backtoBooks = document.querySelectorAll("#back-to-books");
+    const prevButtons = document.querySelectorAll("#prev-chapter");
+    const nextButtons = document.querySelectorAll("#next-chapter"); // ← SIN "s"
+    
+    console.log("🎮 Configurando botones de navegación...");
+    console.log("  - Botones 'Back':", backtoBooks.length);
+    console.log("  - Botones 'Previous':", prevButtons.length);
+    console.log("  - Botones 'Next':", nextButtons.length);
+    
+    // ===== BOTÓN: BACK TO BOOKS =====
+    backtoBooks.forEach(btn => {
+        btn.addEventListener("click", () => {
+            console.log("🏠 Volver a la lista de libros/secciones");
+            
+            const scriptureTitle = document.getElementById("scripture-title");
+            const booksContainer = document.getElementById("books-container");
+            const chaptersContainer = document.getElementById("chapters-container");
+            const scriptureContent = document.getElementById("scripture-content");
+            
+            // Ocultar contenido y capítulos
+            scriptureContent.classList.add("hidden");
+            chaptersContainer.classList.add("hidden");
+            
+            // Mostrar libros/secciones
+            booksContainer.classList.remove("hidden");
+            
+            // Cambiar título
+            scriptureTitle.innerHTML = `<h2>📖 ${currentScripture.name}</h2>`;
+            
+            // Resetear índice de capítulo
+            currentScripture.currentChapterIndex = null;
         });
-    } catch (error){
-        console.error("Error al cargar: ", error);
-        console.error("Stack trace: ", error.stack);
+    });
+    
+    // ===== BOTÓN: PREVIOUS =====
+    prevButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            console.log("⬅️ Ir al capítulo/sección anterior");
+            navigateToPrevious();
+        });
+    });
+    
+    // ===== BOTÓN: NEXT =====
+    nextButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            console.log("➡️ Ir al capítulo/sección siguiente");
+            navigateToNext();
+        });
+    });
+    
+    console.log("✅ Botones configurados");
+}
+
+//función de navegación de previous prevoius
+function navigateToPrevious() {
+    if (currentScripture.structureType === "books") {
+        // Navegación para books con chapters
+        const currentBook = currentScripture.data.books[currentScripture.currentBookIndex];
+        const currentChapterIndex = currentScripture.currentChapterIndex;
+        
+        if (currentChapterIndex > 0) {
+            // Hay capítulo anterior en el mismo libro
+            const prevChapter = currentBook.chapters[currentChapterIndex - 1];
+            showChapterContent(currentBook.book, prevChapter);
+        } else {
+            // Ir al último capítulo del libro anterior
+            if (currentScripture.currentBookIndex > 0) {
+                const prevBook = currentScripture.data.books[currentScripture.currentBookIndex - 1];
+                currentScripture.currentBookIndex--;
+                const lastChapter = prevBook.chapters[prevBook.chapters.length - 1];
+                showChapterContent(prevBook.book, lastChapter);
+            } else {
+                console.log("❌ Ya estás en el primer capítulo");
+                alert("You're at the beginning!");
+            }
+        }
+    } else if (currentScripture.structureType === "sections") {
+        // Navegación para sections de D&C
+        const currentSectionIndex = currentScripture.currentBookIndex;
+        
+        if (currentSectionIndex > 0) {
+            const prevSection = currentScripture.data.sections[currentSectionIndex - 1];
+            showChapterContent(currentScripture.name, prevSection);
+        } else {
+            console.log("❌ Ya estás en la primera sección");
+            alert("You're at the beginning!");
+        }
     }
-}*/
+}
 
-
+function navigateToNext() {
+    if (currentScripture.structureType === "books") {
+        // Navegación para books con chapters
+        const currentBook = currentScripture.data.books[currentScripture.currentBookIndex];
+        const currentChapterIndex = currentScripture.currentChapterIndex;
+        
+        if (currentChapterIndex < currentBook.chapters.length - 1) {
+            // Hay capítulo siguiente en el mismo libro
+            const nextChapter = currentBook.chapters[currentChapterIndex + 1];
+            showChapterContent(currentBook.book, nextChapter);
+        } else {
+            // Ir al primer capítulo del siguiente libro
+            if (currentScripture.currentBookIndex < currentScripture.data.books.length - 1) {
+                const nextBook = currentScripture.data.books[currentScripture.currentBookIndex + 1];
+                currentScripture.currentBookIndex++;
+                const firstChapter = nextBook.chapters[0];
+                showChapterContent(nextBook.book, firstChapter);
+            } else {
+                console.log("❌ Ya estás en el último capítulo");
+                alert("You've reached the end!");
+            }
+        }
+    } else if (currentScripture.structureType === "sections") {
+        // Navegación para sections de D&C
+        const currentSectionIndex = currentScripture.currentBookIndex;
+        
+        if (currentSectionIndex < currentScripture.data.sections.length - 1) {
+            const nextSection = currentScripture.data.sections[currentSectionIndex + 1];
+            showChapterContent(currentScripture.name, nextSection);
+        } else {
+            console.log("❌ Ya estás en la última sección");
+            alert("You've reached the end!");
+        }
+    }
+}
