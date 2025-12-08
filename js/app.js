@@ -4,15 +4,25 @@
     "use strict";
     document.addEventListener("DOMContentLoaded", () => {
         console.log("ULiahona — main initialized");
-        const savedTheme = localStorage.getItem("ul_theme");
-        if (savedTheme === "dark") document.documentElement.classList.add("dark");
+        
+        // ===== APLICAR TEMA GUARDADO =====
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "dark") {
+            document.body.classList.add("dark");
+            console.log("🌙 Dark theme applied");
+        } else {
+            document.body.classList.remove("dark");
+            console.log("☀️ Light theme applied");
+        }
+        
         window.UL = window.UL || {};
         window.UL.log = (...args) => console.log("[ULiahona]", ...args);
     });
 })();
 
 import { initHome } from "./controllers/homeController.js";
-import { initReader } from "./controllers/readerController.js";  // ← IMPORTAR
+import { initReader } from "./controllers/readerController.js";
+import { initSettings } from "./controllers/settingsController.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     console.log("DOMContentLoaded fired — checking page for init...");
@@ -29,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Detectar READER ← AGREGAR ESTO
+    // Detectar READER
     const hasReaderContent = !!document.querySelector(".reading-content");
     console.log("reading-content found:", hasReaderContent);
     if (hasReaderContent) {
@@ -38,6 +48,17 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("initReader() invoked");
         } catch (err) {
             console.error("Error running initReader:", err);
+        }
+    }
+
+    // Detectar SETTINGS
+    const hasSettings = !!document.querySelector(".settings-content");
+    if (hasSettings) {
+        try {
+            initSettings();
+            console.log("initSettings() invoked");
+        } catch (err) {
+            console.error("Error running initSettings:", err);
         }
     }
 });

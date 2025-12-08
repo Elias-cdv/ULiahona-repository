@@ -171,3 +171,90 @@ h1, h2, h3 {
     }
 }
 
+/* =========================================================
+   DARK MODE GLOBAL
+   ========================================================= */
+
+body.dark {
+    background: #1a1a1a;
+    color: var(--text-light);
+}
+
+body.dark .sidebar {
+    background: #0d1117;
+}
+
+body.dark .content {
+    background: #1a1a1a;
+}
+
+/* Home - Dark Mode */
+body.dark .progress-card,
+body.dark .quote-card,
+body.dark .book-card {
+    background: rgba(30, 30, 30, 0.95);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+body.dark .book-name,
+body.dark h2,
+body.dark h3 {
+    color: var(--gold);
+}
+
+body.dark .quote-card blockquote,
+body.dark .quote-author {
+    color: var(--text-light);
+}
+
+/* Reader - Dark Mode */
+body.dark .scripture-container,
+body.dark .reading-content,
+body.dark .toolbar {
+    background: rgba(30, 30, 30, 0.95);
+    border-color: #333;
+}
+
+body.dark .scripture-item {
+    background: rgba(40, 40, 40, 0.9);
+}
+
+body.dark .scripture-item:hover {
+    background: rgba(212, 175, 55, 0.2);
+}
+
+body.dark .scripture-name,
+body.dark .book-item,
+body.dark .chapter-button {
+    color: var(--text-light);
+}
+
+body.dark .book-item,
+body.dark .chapter-button {
+    background: rgba(40, 40, 40, 0.9);
+}
+
+body.dark .book-item:hover,
+body.dark .chapter-button:hover {
+    background: rgba(212, 175, 55, 0.2);
+}
+
+body.dark .verse {
+    color: var(--text-light);
+}
+
+body.dark .verse:hover {
+    background: rgba(40, 40, 40, 0.5);
+}
+
+body.dark .nav-btn {
+    background: linear-gradient(135deg, var(--gold), #C49B33);
+}
+
+body.dark .breadcrumb {
+    background: rgba(212, 175, 55, 0.1);
+}
+
+body.dark .breadcrumb-item {
+    color: var(--gold);
+}

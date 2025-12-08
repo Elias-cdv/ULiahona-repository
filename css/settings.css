@@ -1,0 +1,237 @@
+/* -------- TIPOGRAFÍAS -------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lato:wght@300;400;700&family=Merriweather:wght@300;400;700&family=Libre+Baskerville:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+/* -------- VARIABLES GLOBALES -------- */
+:root {
+    /* Colors */
+    --gold: #D4AF37;
+    --deep-blue: #0A1A2F;
+    --off-white: #F5F4EF;
+    --text-dark: #1b1b1b;
+    --text-light: #f0f0f0;
+    --gray-light: #d6d6d6;
+
+    /* Typography */
+    --title-font: 'Poppins';
+    --body-font: 'Inter';
+
+    /* Animation */
+    --transition-fast: 0.2s ease;
+    --transition-smooth: 0.35s ease;
+}
+
+.settings-content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 3rem 2rem;
+}
+
+.settings-section {
+    width: 100%;
+    max-width: 700px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 24px rgba(10, 26, 47, 0.1);
+}
+
+.settings-title {
+    font-family: var(--title-font);
+    font-size: 2rem;
+    color: var(--deep-blue);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+/* Setting Item */
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-info h3 {
+    font-family: var(--title-font);
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    margin-bottom: 0.3rem;
+}
+
+.setting-description {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--gray-light);
+    border-radius: 30px;
+    transition: var(--transition-smooth);
+}
+
+.toggle-slider:before {
+    content: "";
+    position: absolute;
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: var(--transition-smooth);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: var(--gold);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(30px);
+}
+
+/* Reading Style Options */
+.reading-style-options {
+    display: flex;
+    gap: 1rem;
+}
+
+.checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: rgba(212, 175, 55, 0.1);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-weight: 500;
+}
+
+.checkbox-option:hover {
+    background: rgba(212, 175, 55, 0.2);
+}
+
+.checkbox-option input {
+    display: none;
+}
+
+.checkbox-option input:checked + .checkmark {
+    opacity: 1;
+}
+
+.checkbox-option input:checked ~ * {
+    color: var(--gold);
+}
+
+.checkbox-option:has(input:checked) {
+    border-color: var(--gold);
+    background: rgba(212, 175, 55, 0.2);
+}
+
+.checkmark {
+    opacity: 0;
+    color: var(--gold);
+    font-weight: bold;
+    transition: var(--transition-fast);
+}
+
+/* Export Button */
+.export-btn {
+    padding: 0.8rem 2rem;
+    background: linear-gradient(135deg, var(--gold), #C49B33);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--body-font);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(212, 175, 55, 0.4);
+}
+
+.export-btn:active {
+    transform: translateY(0);
+}
+
+/* Dark Mode Styles */
+body.dark {
+    background: #1a1a1a;
+    color: var(--text-light);
+}
+
+body.dark .settings-section {
+    background: rgba(30, 30, 30, 0.95);
+}
+
+body.dark .settings-title {
+    color: var(--gold);
+}
+
+body.dark .setting-info h3 {
+    color: var(--text-light);
+}
+
+body.dark .setting-description {
+    color: #aaa;
+}
+
+body.dark .setting-item {
+    border-bottom-color: #444;
+}
+
+body.dark .checkbox-option {
+    background: rgba(212, 175, 55, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .reading-style-options {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .checkbox-option {
+        width: 100%;
+    }
+}

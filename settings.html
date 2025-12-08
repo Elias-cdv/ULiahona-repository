@@ -47,16 +47,66 @@
             </a>
         </nav>
     </aside>
-    <!-- =============================== -->
-    <!--            CONTENIDO           -->
-    <!-- =============================== -->
-    <main class="content">
+    <main class="content settings-content">
+        <section class="settings-section">
+            <h2 class="settings-title">⚙️ Settings</h2>
+            <!-- DARK MODE / LIGHT MODE -->
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Dark mode / Light mode</h3>
+                    <p class="setting-description">Toggle between dark and light theme</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Reading style</h3>
+                    <p class="setting-description">Choose your preferred reading experience</p>
+                </div>
+                <div class="reading-style-options">
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="reading-style" value="scroll" id="style-scroll" checked>
+                        <span class="checkmark">✓</span>
+                        Scroll
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="reading-style" value="smooth" id="style-smooth">
+                        <span class="checkmark">✓</span>
+                        Smooth page
+                    </label>
+                </div>
+            </div>
+            <!-- AUDIO SETTINGS -->
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Audio settings</h3>
+                    <p class="setting-description">Music on / Music off</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="music-toggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
 
+            <!-- EXPORT NOTES -->
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Export notes</h3>
+                    <p class="setting-description">Download your notes as a text file</p>
+                </div>
+                <button id="export-notes-btn" class="export-btn">
+                    Export notes
+                </button>
+            </div>
+        </section>
     </main>
     <!-- =============================== -->
     <!--              JS                 -->
     <!-- =============================== -->
     <script type="module" src="js/app.js"></script> 
-    <script type="module" src="js/controllers/settingsController.js"></script>
- </body>
- </html>
+</body>
+</html>
