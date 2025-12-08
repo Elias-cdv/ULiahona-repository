@@ -26,6 +26,8 @@ export function initReader() {
 
     // Renderizar lista de escrituras (SOLO IMÁGENES)
     renderScriptureList(scriptureList);
+
+    initToolbar();
 }
 
 // Función que renderiza escrituras del json y las muestra con las imagenes designadas
@@ -359,6 +361,7 @@ function showChapterContent(bookName, chapterData) {
                 <button id="back-to-books" class="nav-btn">Back to Books</button>
                 <button id="prev-chapter" class="nav-btn">Previous</button>
                 <button id="next-chapter" class="nav-btn">Next</button>
+                <button id="mark-complete-btn" class="nav-btn complete-btn">Mark as complete</button>
             </div>
         `;
         
@@ -393,8 +396,9 @@ function setupNavigationButtons() {
     // Obtener los botones
     const backtoBooks = document.querySelectorAll("#back-to-books");
     const prevButtons = document.querySelectorAll("#prev-chapter");
-    const nextButtons = document.querySelectorAll("#next-chapter"); // ← SIN "s"
-    
+    const nextButtons = document.querySelectorAll("#next-chapter");
+    const markCompleteButtons = document.querySelectorAll("#mark-complete-btn");    
+
     console.log("🎮 Configurando botones de navegación...");
     console.log("  - Botones 'Back':", backtoBooks.length);
     console.log("  - Botones 'Previous':", prevButtons.length);
@@ -440,8 +444,26 @@ function setupNavigationButtons() {
             navigateToNext();
         });
     });
+
+    // ===== BOTÓN: MARK AS COMPLETE =====
+    console.log("🔍 Mark Complete buttons found:", markCompleteButtons.length);
     
+    markCompleteButtons.forEach(btn => {
+        // Verificar si ya está completado
+        if (checkIfChapterCompleted()) {
+            btn.textContent = "✓ Completed";
+            btn.classList.add("completed");
+            btn.disabled = true;
+        }
+        
+        btn.addEventListener("click", () => {
+            console.log("🖱️ Click en Mark as Complete");
+            markChapterComplete(); // ← Ahora sí llamará a la función
+        });
+    });
+
     console.log("✅ Botones configurados");
+
 }
 
 //función de navegación de previous prevoius
@@ -515,4 +537,374 @@ function navigateToNext() {
             alert("You've reached the end!");
         }
     }
+}
+//===========================
+//   TOOLBAR FUNCTIONALITY
+//===========================
+
+let currentPanel = null; // Track which panel is open
+
+export function initToolbar() {
+    console.log("📝 Initializing toolbar...");
+    
+    const toolbar = document.querySelector(".toolbar");
+    
+    if (!toolbar) {
+        console.warn("❌ Toolbar not found");
+        return;
+    }
+    
+    // Crear contenido del toolbar con TODOS los botones
+    toolbar.innerHTML = `
+        <h3>🛠️ Toolbar</h3>
+        
+        <!-- BOTONES DEL TOOLBAR -->
+        <div class="toolbar-buttons">
+            <button class="toolbar-btn" data-panel="notes" title="Notes">
+                📝 Notes
+            </button>
+            <button class="toolbar-btn" data-panel="highlighter" title="Highlighter">
+                🖍️ Highlight
+            </button>
+            <button class="toolbar-btn" data-panel="progress" title="Progress">
+                📊 Progress
+            </button>
+            <button class="toolbar-btn" data-panel="music" title="Music">
+                🎵 Music
+            </button>
+            <button class="toolbar-btn" data-panel="themes" title="Themes">
+                🎨 Themes
+            </button>
+        </div>
+        
+        <!-- PANEL DE CONTROL -->
+        <div id="control-panel" class="control-panel hidden">
+            <!-- PANEL: NOTES -->
+            <div class="panel-content" data-content="notes">
+                <h4>📝 My Notes</h4>
+                <textarea 
+                    id="reader-notes" 
+                    class="notes-textarea" 
+                    placeholder="Write your thoughts, insights, or reflections here...
+                    
+Your notes are automatically saved."
+                ></textarea>
+                <p class="panel-info">💾 Auto-saved to your browser</p>
+                <button id="toolbar-export-btn" class="panel-action-btn">
+                    📥 Export Notes
+                </button>
+            </div>
+            
+            <!-- PANEL: HIGHLIGHTER -->
+            <div class="panel-content hidden" data-content="highlighter">
+                <h4>🖍️ Highlighter</h4>
+                <p class="panel-info">Select text in the scripture, then choose a color:</p>
+                <div class="color-palette">
+                    <button class="color-btn" data-color="yellow" style="background: #ffeb3b;" title="Yellow">
+                        Yellow
+                    </button>
+                    <button class="color-btn" data-color="orange" style="background: #ff9800;" title="Orange">
+                        Orange
+                    </button>
+                    <button class="color-btn" data-color="green" style="background: #4caf50;" title="Green">
+                        Green
+                    </button>
+                    <button class="color-btn" data-color="pink" style="background: #e91e63;" title="Pink">
+                        Pink
+                    </button>
+                </div>
+                <button id="clear-highlights-btn" class="panel-action-btn danger">
+                    🗑️ Clear All Highlights
+                </button>
+            </div>
+            
+            <!-- PANEL: PROGRESS -->
+            <div class="panel-content hidden" data-content="progress">
+                <h4>📊 Reading Progress</h4>
+                <div id="progress-display">
+                    <p class="panel-info">No scripture selected yet.</p>
+                </div>
+            </div>
+            
+            <!-- PANEL: MUSIC -->
+            <div class="panel-content hidden" data-content="music">
+                <h4>🎵 Background Music</h4>
+                <p class="panel-info">Select a playlist:</p>
+                <select id="music-playlist" class="music-select">
+                    <option value="">-- Select Music --</option>
+                    <option value="PLqwKWPzu8KtT9X7YsHx5zJpVSjqGdJCEO">Peaceful Piano</option>
+                    <option value="PLqwKWPzu8KtQfMJD8bEwMEQMq6mNJPJTL">Instrumental Hymns</option>
+                    <option value="PLqwKWPzu8KtRY7Ef4EGBBfPvhB6OkPVx6">Classical Study</option>
+                </select>
+                <div id="youtube-player-container" class="hidden">
+                    <div id="youtube-player"></div>
+                </div>
+                <div class="music-controls hidden" id="music-controls">
+                    <button id="music-play" class="music-btn">▶️ Play</button>
+                    <button id="music-pause" class="music-btn">⏸️ Pause</button>
+                    <button id="music-stop" class="music-btn">⏹️ Stop</button>
+                </div>
+            </div>
+            
+            <!-- PANEL: THEMES -->
+            <div class="panel-content hidden" data-content="themes">
+                <h4>🎨 Scripture Themes</h4>
+                <p class="panel-info">Go to the Search page to explore scriptures by theme</p>
+                <a href="searching.html" class="panel-action-btn">
+                    🔍 Go to Search
+                </a>
+            </div>
+        </div>
+    `;
+    
+    // ===== SETUP FUNCTIONALITY =====
+    setupToolbarButtons();
+    loadNotes();
+    setupNotesAutosave();
+    setupHighlighter();
+    setupProgress();
+    setupMusic();
+    
+    console.log("✅ Toolbar initialized with all panels");
+}
+
+// ===== TOGGLE PANELS =====
+function setupToolbarButtons() {
+    const buttons = document.querySelectorAll(".toolbar-btn");
+    const controlPanel = document.getElementById("control-panel");
+    const panels = document.querySelectorAll(".panel-content");
+    
+    buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const panelName = btn.dataset.panel;
+            
+            // Si es el mismo panel, toggle visibility
+            if (currentPanel === panelName && !controlPanel.classList.contains("hidden")) {
+                controlPanel.classList.add("hidden");
+                currentPanel = null;
+                btn.classList.remove("active");
+                return;
+            }
+            
+            // Mostrar panel seleccionado
+            currentPanel = panelName;
+            controlPanel.classList.remove("hidden");
+            
+            // Ocultar todos los paneles
+            panels.forEach(p => p.classList.add("hidden"));
+            
+            // Mostrar panel activo
+            const activePanel = document.querySelector(`[data-content="${panelName}"]`);
+            if (activePanel) {
+                activePanel.classList.remove("hidden");
+            }
+            
+            // Highlight active button
+            buttons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            
+            console.log(`📂 Panel opened: ${panelName}`);
+        });
+    });
+}
+
+// ===== NOTES FUNCTIONALITY =====
+function loadNotes() {
+    const textarea = document.getElementById("reader-notes");
+    if (!textarea) return;
+    
+    const savedNotes = localStorage.getItem("reader-notes") || "";
+    textarea.value = savedNotes;
+    console.log("📖 Notes loaded");
+}
+
+function setupNotesAutosave() {
+    const textarea = document.getElementById("reader-notes");
+    if (textarea) {
+        textarea.addEventListener("input", () => {
+            localStorage.setItem("reader-notes", textarea.value);
+            console.log("💾 Notes saved");
+        });
+    }
+    
+    const exportBtn = document.getElementById("toolbar-export-btn");
+    if (exportBtn) {
+        exportBtn.addEventListener("click", () => {
+            const notes = localStorage.getItem("reader-notes") || "No notes available.";
+            const blob = new Blob([notes], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `uliahona-notes-${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            console.log("✅ Notes exported");
+        });
+    }
+}
+
+// ===== HIGHLIGHTER (placeholder) =====
+function setupHighlighter() {
+    console.log("🖍️ Highlighter setup - will implement next");
+    // TO DO: Implementar en la siguiente sesión
+}
+
+// ===== PROGRESS TRACKING =====
+
+function setupProgress() {
+    console.log("📊 Progress tracking initialized");
+    updateProgressDisplay();
+}
+
+function updateProgressDisplay() {
+    const progressDisplay = document.getElementById("progress-display");
+    if (!progressDisplay) return;
+    
+    // Obtener progreso guardado
+    const progress = JSON.parse(localStorage.getItem("reading-progress") || "{}");
+    
+    if (Object.keys(progress).length === 0) {
+        progressDisplay.innerHTML = `<p class="panel-info">Start reading and mark chapters as complete to track your progress!</p>`;
+        return;
+    }
+    
+    // Generar HTML de progreso
+    let html = "";
+    
+    for (const [scripture, data] of Object.entries(progress)) {
+        const percentage = Math.round((data.completed / data.total) * 100);
+        
+        html += `
+            <div class="progress-item">
+                <h5>📖 ${scripture}</h5>
+                <p class="panel-info">${data.completed} / ${data.total} chapters completed</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${percentage}%"></div>
+                </div>
+                <p style="text-align: right; margin-top: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--gold);">
+                    ${percentage}%
+                </p>
+            </div>
+        `;
+    }
+    
+    progressDisplay.innerHTML = html;
+}
+
+function markChapterComplete() {
+    console.log("🔍 Checking current scripture state:", currentScripture);
+    
+    if (!currentScripture.name) {
+        alert("❌ No scripture selected");
+        return;
+    }
+    
+    if (currentScripture.currentBookIndex === null) {
+        alert("❌ No book selected");
+        return;
+    }
+    
+    if (currentScripture.currentChapterIndex === null && currentScripture.structureType === "books") {
+        alert("❌ No chapter selected");
+        return;
+    }
+    
+    // Obtener progreso actual
+    const progress = JSON.parse(localStorage.getItem("reading-progress") || "{}");
+    
+    // Inicializar si no existe
+    if (!progress[currentScripture.name]) {
+        let totalChapters = 0;
+        
+        if (currentScripture.structureType === "books") {
+            // Contar todos los capítulos de todos los libros
+            currentScripture.data.books.forEach(book => {
+                totalChapters += book.chapters.length;
+            });
+        } else if (currentScripture.structureType === "sections") {
+            // Para D&C, cada section es un "capítulo"
+            totalChapters = currentScripture.data.sections.length;
+        }
+        
+        progress[currentScripture.name] = {
+            total: totalChapters,
+            completed: 0,
+            chapters: {}
+        };
+    }
+    
+    // Crear ID único del capítulo
+    let chapterId;
+    if (currentScripture.structureType === "books") {
+        const currentBook = currentScripture.data.books[currentScripture.currentBookIndex];
+        const currentChapter = currentBook.chapters[currentScripture.currentChapterIndex];
+        chapterId = `${currentBook.book}-${currentChapter.chapter}`;
+    } else {
+        const currentSection = currentScripture.data.sections[currentScripture.currentBookIndex];
+        chapterId = `section-${currentSection.section}`;
+    }
+    
+    console.log("📝 Chapter ID:", chapterId);
+    
+    // Marcar como completado si no lo está ya
+    if (!progress[currentScripture.name].chapters[chapterId]) {
+        progress[currentScripture.name].chapters[chapterId] = true;
+        progress[currentScripture.name].completed++;
+        
+        // Guardar
+        localStorage.setItem("reading-progress", JSON.stringify(progress));
+        
+        console.log("✅ Chapter marked as complete:", chapterId);
+        
+        // Actualizar display
+        updateProgressDisplay();
+        
+        // Actualizar botón
+        const btn = document.getElementById("mark-complete-btn");
+        if (btn) {
+            btn.textContent = "✓ Completed";
+            btn.classList.add("completed");
+            btn.disabled = true;
+        }
+        
+        // Mostrar mensaje
+        alert("✅ Chapter marked as complete!");
+    } else {
+        alert("ℹ️ This chapter is already completed");
+    }
+}
+
+function checkIfChapterCompleted() {
+    if (!currentScripture.name || currentScripture.currentBookIndex === null) {
+        return false;
+    }
+    
+    if (currentScripture.structureType === "books" && currentScripture.currentChapterIndex === null) {
+        return false;
+    }
+    
+    const progress = JSON.parse(localStorage.getItem("reading-progress") || "{}");
+    
+    if (!progress[currentScripture.name]) return false;
+    
+    let chapterId;
+    if (currentScripture.structureType === "books") {
+        const currentBook = currentScripture.data.books[currentScripture.currentBookIndex];
+        const currentChapter = currentBook.chapters[currentScripture.currentChapterIndex];
+        chapterId = `${currentBook.book}-${currentChapter.chapter}`;
+    } else {
+        const currentSection = currentScripture.data.sections[currentScripture.currentBookIndex];
+        chapterId = `section-${currentSection.section}`;
+    }
+    
+    return !!progress[currentScripture.name].chapters[chapterId];
+}
+
+
+// ===== MUSIC (placeholder) =====
+function setupMusic() {
+    console.log("🎵 Music setup - will implement next");
+    // TO DO: Implementar YouTube API
 }
