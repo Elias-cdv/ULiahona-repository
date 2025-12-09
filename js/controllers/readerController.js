@@ -1,7 +1,9 @@
-//===========================
-//   READER CONTROLLER (VERSIÓN MÍNIMA)
-//===========================
 import { loadScripture } from "../modules/chapters.js";
+// YouTube API requires a global callback
+window.onYouTubeIframeAPIReady = function() {
+    console.log("✅ YouTube IFrame API is ready!");
+    window.youtubeAPIReady = true;
+};
 
 let currentScripture = {
     file: null, 
@@ -561,105 +563,73 @@ export function initToolbar() {
         return;
     }
     
-    // Crear contenido del toolbar con TODOS los botones
+    // ===== REEMPLAZO: TOOLBAR HTML (MUSIC panel simplificado: URL + file upload + audio fallback) =====
     toolbar.innerHTML = `
         <h3>🛠️ Toolbar</h3>
-        
-        <!-- BOTONES DEL TOOLBAR -->
         <div class="toolbar-buttons">
-            <button class="toolbar-btn" data-panel="notes" title="Notes">
-                📝 Notes
-            </button>
-            <button class="toolbar-btn" data-panel="highlighter" title="Highlighter">
-                🖍️ Highlight
-            </button>
-            <button class="toolbar-btn" data-panel="progress" title="Progress">
-                📊 Progress
-            </button>
-            <button class="toolbar-btn" data-panel="music" title="Music">
-                🎵 Music
-            </button>
-            <button class="toolbar-btn" data-panel="themes" title="Themes">
-                🎨 Themes
-            </button>
+            <button class="toolbar-btn" data-panel="notes" title="Notes">📝 Notes</button>
+            <button class="toolbar-btn" data-panel="highlighter" title="Highlighter">🖍️ Highlight</button>
+            <button class="toolbar-btn" data-panel="progress" title="Progress">📊 Progress</button>
+            <button class="toolbar-btn" data-panel="music" title="Music">🎵 Music</button>
+            <button class="toolbar-btn" data-panel="themes" title="Themes">🎨 Themes</button>
         </div>
-        
-        <!-- PANEL DE CONTROL -->
+
         <div id="control-panel" class="control-panel hidden">
-            <!-- PANEL: NOTES -->
             <div class="panel-content" data-content="notes">
                 <h4>📝 My Notes</h4>
-                <textarea 
-                    id="reader-notes" 
-                    class="notes-textarea" 
-                    placeholder="Write your thoughts, insights, or reflections here...
-                    
-Your notes are automatically saved."
-                ></textarea>
+                <textarea id="reader-notes" class="notes-textarea" placeholder="Write your thoughts..."></textarea>
                 <p class="panel-info">💾 Auto-saved to your browser</p>
-                <button id="toolbar-export-btn" class="panel-action-btn">
-                    📥 Export Notes
-                </button>
+                <button id="toolbar-export-btn" class="panel-action-btn">📥 Export Notes</button>
             </div>
-            
-            <!-- PANEL: HIGHLIGHTER -->
+
             <div class="panel-content hidden" data-content="highlighter">
                 <h4>🖍️ Highlighter</h4>
-                <p class="panel-info">Select text in the scripture, then choose a color:</p>
+                <p class="panel-info">Select text, then choose a color:</p>
                 <div class="color-palette">
-                    <button class="color-btn" data-color="yellow" style="background: #ffeb3b;" title="Yellow">
-                        Yellow
-                    </button>
-                    <button class="color-btn" data-color="orange" style="background: #ff9800;" title="Orange">
-                        Orange
-                    </button>
-                    <button class="color-btn" data-color="green" style="background: #4caf50;" title="Green">
-                        Green
-                    </button>
-                    <button class="color-btn" data-color="pink" style="background: #e91e63;" title="Pink">
-                        Pink
-                    </button>
+                    <button class="color-btn" data-color="yellow" style="background:#ffeb3b;">Yellow</button>
+                    <button class="color-btn" data-color="orange" style="background:#ff9800;">Orange</button>
+                    <button class="color-btn" data-color="green" style="background:#4caf50;">Green</button>
+                    <button class="color-btn" data-color="pink" style="background:#e91e63;">Pink</button>
                 </div>
-                <button id="clear-highlights-btn" class="panel-action-btn danger">
-                    🗑️ Clear All Highlights
-                </button>
+                <button id="clear-highlights-btn" class="panel-action-btn danger">🗑️ Clear All Highlights</button>
             </div>
-            
-            <!-- PANEL: PROGRESS -->
+
             <div class="panel-content hidden" data-content="progress">
                 <h4>📊 Reading Progress</h4>
                 <div id="progress-display">
                     <p class="panel-info">No scripture selected yet.</p>
                 </div>
             </div>
-            
-            <!-- PANEL: MUSIC -->
+
+            <!-- MUSIC: URL or local file, simple audio fallback -->
             <div class="panel-content hidden" data-content="music">
-                <h4>🎵 Background Music</h4>
-                <p class="panel-info">Select a playlist:</p>
-                <select id="music-playlist" class="music-select">
-                    <option value="">-- Select Music --</option>
-                    <option value="PLqwKWPzu8KtT9X7YsHx5zJpVSjqGdJCEO">Peaceful Piano</option>
-                    <option value="PLqwKWPzu8KtQfMJD8bEwMEQMq6mNJPJTL">Instrumental Hymns</option>
-                    <option value="PLqwKWPzu8KtRY7Ef4EGBBfPvhB6OkPVx6">Classical Study</option>
-                </select>
-                <div id="youtube-player-container" class="hidden">
-                    <div id="youtube-player"></div>
+                <h4>🎵 Background Audio</h4>
+                <p class="panel-info">Paste an audio URL (mp3/ogg) or upload a file.</p>
+
+                <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.6rem;">
+                    <input id="music-url" class="music-input" type="text" placeholder="https://example.com/file.mp3" style="flex:1;padding:.4rem" />
+                    <button id="music-load" class="panel-action-btn">Load</button>
                 </div>
-                <div class="music-controls hidden" id="music-controls">
+
+                <div style="margin-bottom:.6rem;">
+                    <input id="music-file" type="file" accept="audio/*" />
+                </div>
+
+                <div id="audio-player-container" class="hidden" style="margin-top:.6rem;">
+                    <!-- audio element will be injected here -->
+                </div>
+
+                <div class="music-controls hidden" id="music-controls" style="margin-top:.6rem;">
                     <button id="music-play" class="music-btn">▶️ Play</button>
                     <button id="music-pause" class="music-btn">⏸️ Pause</button>
                     <button id="music-stop" class="music-btn">⏹️ Stop</button>
                 </div>
             </div>
-            
-            <!-- PANEL: THEMES -->
+
             <div class="panel-content hidden" data-content="themes">
                 <h4>🎨 Scripture Themes</h4>
                 <p class="panel-info">Go to the Search page to explore scriptures by theme</p>
-                <a href="searching.html" class="panel-action-btn">
-                    🔍 Go to Search
-                </a>
+                <a href="searching.html" class="panel-action-btn">🔍 Go to Search</a>
             </div>
         </div>
     `;
@@ -670,7 +640,6 @@ Your notes are automatically saved."
     setupNotesAutosave();
     setupHighlighter();
     setupProgress();
-    setupMusic();
     
     console.log("✅ Toolbar initialized with all panels");
 }
@@ -1099,10 +1068,127 @@ function checkIfChapterCompleted() {
     
     return !!progress[currentScripture.name].chapters[chapterId];
 }
+// --- YouTube player global y handlers ---
+let youtubePlayer = null;
 
+function onPlayerReady(event) {
+    const controls = document.getElementById("music-controls");
+    if (controls) controls.classList.remove("hidden");
+    console.log("YouTube player ready");
+}
 
-// ===== MUSIC (placeholder) =====
-function setupMusic() {
-    console.log("🎵 Music setup - will implement next");
-    // TO DO: Implementar YouTube API
+function onPlayerStateChange(event) {
+    // puedes manejar estados si quieres (event.data)
+    // 1 = playing, 2 = paused, 0 = ended
+}
+
+function onPlayerError(event) {
+    console.error("YouTube player error:", event);
+    alert("YouTube player error. Check console for details.");
+}
+
+/* helpers para validar/parsear YouTube */
+function isValidVideoId(id) {
+    return typeof id === "string" && /^[A-Za-z0-9_-]{11}$/.test(id);
+}
+
+function parseYouTubeUrl(url) {
+    // acepta: youtu.be/ID, youtube.com/watch?v=ID, youtube.com/embed/ID, playlist?list=ID, o directamente el ID
+    try {
+        // si ya es un id posible, devolverlo
+        if (isValidVideoId(url.trim())) return { type: "video", id: url.trim() };
+
+        const u = new URL(url);
+        const host = u.hostname.replace(/^www\./, "").toLowerCase();
+
+        // youtu.be/VIDEOID
+        if (host === "youtu.be") {
+            const id = u.pathname.slice(1).split(/[/?#]/)[0];
+            if (isValidVideoId(id)) return { type: "video", id };
+        }
+
+        // youtube.com
+        if (host.endsWith("youtube.com")) {
+            // playlist
+            const list = u.searchParams.get("list");
+            if (list) return { type: "playlist", id: list };
+
+            // watch?v=
+            const v = u.searchParams.get("v");
+            if (v && isValidVideoId(v)) return { type: "video", id: v };
+
+            // /embed/ID or /v/ID
+            const m = u.pathname.match(/\/(?:embed|v)\/([^/?#]+)/);
+            if (m && isValidVideoId(m[1])) return { type: "video", id: m[1] };
+        }
+
+        return null;
+    } catch (e) {
+        return null;
+    }
+}
+
+// safe wrapper que valida antes de instanciar YT.Player
+function createYouTubePlayer(opts = {}) {
+    if (typeof YT === "undefined" || typeof YT.Player === "undefined") {
+        console.error("createYouTubePlayer: YT not ready");
+        return;
+    }
+
+    // destruir anterior
+    if (youtubePlayer && typeof youtubePlayer.destroy === "function") {
+        try { youtubePlayer.destroy(); } catch (e) {}
+        youtubePlayer = null;
+    }
+
+    const playerVars = {
+        autoplay: 0,
+        controls: 1,
+        modestbranding: 1,
+        rel: 0
+    };
+
+    // validaciones
+    if (opts.videoId) {
+        if (!isValidVideoId(opts.videoId)) {
+            alert("Invalid YouTube video ID. Please paste a valid YouTube URL or ID.");
+            return;
+        }
+    } else if (opts.list) {
+        if (!opts.list || typeof opts.list !== "string") {
+            alert("Invalid playlist id.");
+            return;
+        }
+        playerVars.listType = opts.listType || "playlist";
+        playerVars.list = opts.list;
+    } else {
+        alert("No videoId or playlist provided.");
+        return;
+    }
+
+    try {
+        youtubePlayer = new YT.Player("youtube-player", {
+            height: "180",
+            width: "100%",
+            videoId: opts.videoId || undefined,
+            playerVars,
+            events: {
+                onReady: onPlayerReady,
+                onStateChange: onPlayerStateChange,
+                onError: (e) => {
+                    onPlayerError(e);
+                    const code = e && e.data;
+                    // 101/150 -> embedding blocked
+                    if (code === 101 || code === 150) {
+                        alert("This video/playlist does not allow embedding. It will open in YouTube.");
+                        window.open(opts.videoId ? `https://youtu.be/${opts.videoId}` : `https://www.youtube.com/playlist?list=${opts.list}`, "_blank");
+                    }
+                }
+            }
+        });
+        console.log("✅ YouTube player created successfully");
+    } catch (err) {
+        console.error("Error creating YouTube player:", err);
+        alert("Error creating YouTube player. Check console.");
+    }
 }
