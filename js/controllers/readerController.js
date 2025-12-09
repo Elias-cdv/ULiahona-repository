@@ -640,6 +640,7 @@ export function initToolbar() {
     setupNotesAutosave();
     setupHighlighter();
     setupProgress();
+    setupMusic();
     
     console.log("✅ Toolbar initialized with all panels");
 }
@@ -1068,127 +1069,302 @@ function checkIfChapterCompleted() {
     
     return !!progress[currentScripture.name].chapters[chapterId];
 }
-// --- YouTube player global y handlers ---
+//===========================
+//   YOUTUBE MUSIC PLAYER
+//===========================
+
 let youtubePlayer = null;
+let playerReady = false;
 
-function onPlayerReady(event) {
+function setupMusic() {
+    console.log("🎵 Setting up music panel...");
+    
+    const loadBtn = document.getElementById("music-load");
+    const urlInput = document.getElementById("music-url");
+    const playerContainer = document.getElementById("audio-player-container");
     const controls = document.getElementById("music-controls");
-    if (controls) controls.classList.remove("hidden");
-    console.log("YouTube player ready");
-}
-
-function onPlayerStateChange(event) {
-    // puedes manejar estados si quieres (event.data)
-    // 1 = playing, 2 = paused, 0 = ended
-}
-
-function onPlayerError(event) {
-    console.error("YouTube player error:", event);
-    alert("YouTube player error. Check console for details.");
-}
-
-/* helpers para validar/parsear YouTube */
-function isValidVideoId(id) {
-    return typeof id === "string" && /^[A-Za-z0-9_-]{11}$/.test(id);
-}
-
-function parseYouTubeUrl(url) {
-    // acepta: youtu.be/ID, youtube.com/watch?v=ID, youtube.com/embed/ID, playlist?list=ID, o directamente el ID
-    try {
-        // si ya es un id posible, devolverlo
-        if (isValidVideoId(url.trim())) return { type: "video", id: url.trim() };
-
-        const u = new URL(url);
-        const host = u.hostname.replace(/^www\./, "").toLowerCase();
-
-        // youtu.be/VIDEOID
-        if (host === "youtu.be") {
-            const id = u.pathname.slice(1).split(/[/?#]/)[0];
-            if (isValidVideoId(id)) return { type: "video", id };
-        }
-
-        // youtube.com
-        if (host.endsWith("youtube.com")) {
-            // playlist
-            const list = u.searchParams.get("list");
-            if (list) return { type: "playlist", id: list };
-
-            // watch?v=
-            const v = u.searchParams.get("v");
-            if (v && isValidVideoId(v)) return { type: "video", id: v };
-
-            // /embed/ID or /v/ID
-            const m = u.pathname.match(/\/(?:embed|v)\/([^/?#]+)/);
-            if (m && isValidVideoId(m[1])) return { type: "video", id: m[1] };
-        }
-
-        return null;
-    } catch (e) {
-        return null;
-    }
-}
-
-// safe wrapper que valida antes de instanciar YT.Player
-function createYouTubePlayer(opts = {}) {
-    if (typeof YT === "undefined" || typeof YT.Player === "undefined") {
-        console.error("createYouTubePlayer: YT not ready");
+    
+    if (!loadBtn || !urlInput) {
+        console.warn("⚠️ Music controls not found");
         return;
     }
+    
+    // ===== LOAD BUTTON =====
+    loadBtn.addEventListener("click", () => {
+        const url = urlInput.value.trim();
+        
+        if (!url) {
+            alert("⚠️ Please paste a YouTube URL or video ID");
+            return;
+        }
+        
+        console.log("🔄 Loading YouTube video:", url);
+        
+        const parsed = parseYouTubeUrl(url);
+        
+        if (!parsed) {
+            alert("❌ Invalid YouTube URL. Try:\n• https://www.youtube.com/watch?v=VIDEO_ID\n• https://youtu.be/VIDEO_ID\n• Or just the VIDEO_ID");
+            return;
+        }
+        
+        // Mostrar contenedores
+        if (playerContainer) playerContainer.classList.remove("hidden");
+        if (controls) controls.classList.remove("hidden");
+        
+        // Crear player
+        if (parsed.type === "video") {
+            loadYouTubeVideo(parsed.id);
+        } else if (parsed.type === "playlist") {
+            loadYouTubePlaylist(parsed.id);
+        }
+    });
+    
+    // ===== SETUP CONTROLS =====
+    setupMusicControls();
+    
+    console.log("✅ Music setup complete");
+}
 
-    // destruir anterior
-    if (youtubePlayer && typeof youtubePlayer.destroy === "function") {
-        try { youtubePlayer.destroy(); } catch (e) {}
-        youtubePlayer = null;
+function loadYouTubeVideo(videoId) {
+    console.log("🎬 Loading video:", videoId);
+    
+    // Si el player ya existe, cargar nuevo video
+    if (youtubePlayer && playerReady) {
+        try {
+            youtubePlayer.loadVideoById(videoId);
+            console.log("✅ Video loaded in existing player");
+            return;
+        } catch (err) {
+            console.error("Error loading video:", err);
+        }
     }
+    
+    // Crear nuevo player
+    createYouTubePlayer({ videoId });
+}
 
+function loadYouTubePlaylist(playlistId) {
+    console.log("📀 Loading playlist:", playlistId);
+    
+    // Si el player ya existe, cargar nueva playlist
+    if (youtubePlayer && playerReady) {
+        try {
+            youtubePlayer.loadPlaylist({
+                list: playlistId,
+                listType: 'playlist',
+                index: 0
+            });
+            console.log("✅ Playlist loaded in existing player");
+            return;
+        } catch (err) {
+            console.error("Error loading playlist:", err);
+        }
+    }
+    
+    // Crear nuevo player
+    createYouTubePlayer({ list: playlistId, listType: 'playlist' });
+}
+
+function createYouTubePlayer(opts = {}) {
+    console.log("🎬 Creating YouTube player...");
+    
+    // Verificar que YouTube API esté cargada
+    if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
+        console.log("⏳ Waiting for YouTube API...");
+        
+        // Reintentar en 500ms
+        setTimeout(() => createYouTubePlayer(opts), 500);
+        return;
+    }
+    
+    // Destruir player anterior si existe
+    if (youtubePlayer && typeof youtubePlayer.destroy === 'function') {
+        try {
+            youtubePlayer.destroy();
+            console.log("🗑️ Previous player destroyed");
+        } catch (e) {
+            console.warn("Error destroying player:", e);
+        }
+        youtubePlayer = null;
+        playerReady = false;
+    }
+    
+    // Limpiar el contenedor
+    const container = document.getElementById("audio-player-container");
+    if (container) {
+        container.innerHTML = '<div id="youtube-player"></div>';
+    }
+    
+    // Configuración del player
     const playerVars = {
         autoplay: 0,
         controls: 1,
         modestbranding: 1,
         rel: 0
     };
-
-    // validaciones
+    
+    // Configurar según tipo
+    const config = {
+        height: '200',
+        width: '100%',
+        playerVars: playerVars,
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange,
+            'onError': onPlayerError
+        }
+    };
+    
     if (opts.videoId) {
-        if (!isValidVideoId(opts.videoId)) {
-            alert("Invalid YouTube video ID. Please paste a valid YouTube URL or ID.");
-            return;
-        }
+        config.videoId = opts.videoId;
     } else if (opts.list) {
-        if (!opts.list || typeof opts.list !== "string") {
-            alert("Invalid playlist id.");
-            return;
-        }
-        playerVars.listType = opts.listType || "playlist";
-        playerVars.list = opts.list;
-    } else {
-        alert("No videoId or playlist provided.");
-        return;
+        config.playerVars.listType = opts.listType || 'playlist';
+        config.playerVars.list = opts.list;
     }
-
+    
     try {
-        youtubePlayer = new YT.Player("youtube-player", {
-            height: "180",
-            width: "100%",
-            videoId: opts.videoId || undefined,
-            playerVars,
-            events: {
-                onReady: onPlayerReady,
-                onStateChange: onPlayerStateChange,
-                onError: (e) => {
-                    onPlayerError(e);
-                    const code = e && e.data;
-                    // 101/150 -> embedding blocked
-                    if (code === 101 || code === 150) {
-                        alert("This video/playlist does not allow embedding. It will open in YouTube.");
-                        window.open(opts.videoId ? `https://youtu.be/${opts.videoId}` : `https://www.youtube.com/playlist?list=${opts.list}`, "_blank");
-                    }
+        youtubePlayer = new YT.Player('youtube-player', config);
+        console.log("✅ YouTube player created");
+    } catch (err) {
+        console.error("❌ Error creating YouTube player:", err);
+        alert("Error creating player: " + err.message);
+    }
+}
+
+function onPlayerReady(event) {
+    console.log("✅ YouTube Player is ready!");
+    playerReady = true;
+    
+    const controls = document.getElementById("music-controls");
+    if (controls) controls.classList.remove("hidden");
+}
+
+function onPlayerStateChange(event) {
+    const states = {
+        '-1': 'unstarted',
+        '0': 'ended',
+        '1': 'playing',
+        '2': 'paused',
+        '3': 'buffering',
+        '5': 'cued'
+    };
+    
+    console.log("🎵 Player state:", states[event.data] || 'unknown');
+}
+
+function onPlayerError(event) {
+    console.error("❌ YouTube Player error:", event.data);
+    
+    const errorMessages = {
+        2: "Invalid video ID",
+        5: "HTML5 player error",
+        100: "Video not found or deleted",
+        101: "Video owner doesn't allow embedding",
+        150: "Same as 101"
+    };
+    
+    const msg = errorMessages[event.data] || 'Unknown error';
+    alert(`⚠️ YouTube Error: ${msg}`);
+    
+    // Si el video no permite embedding, abrir en YouTube
+    if (event.data === 101 || event.data === 150) {
+        const videoId = youtubePlayer.getVideoData().video_id;
+        if (videoId) {
+            window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+        }
+    }
+}
+
+function setupMusicControls() {
+    const playBtn = document.getElementById("music-play");
+    const pauseBtn = document.getElementById("music-pause");
+    const stopBtn = document.getElementById("music-stop");
+    
+    if (playBtn) {
+        playBtn.addEventListener("click", () => {
+            if (youtubePlayer && playerReady) {
+                try {
+                    youtubePlayer.playVideo();
+                    console.log("▶️ Play");
+                } catch (err) {
+                    console.error("Error playing:", err);
+                }
+            } else {
+                alert("⚠️ Please load a video first");
+            }
+        });
+    }
+    
+    if (pauseBtn) {
+        pauseBtn.addEventListener("click", () => {
+            if (youtubePlayer && playerReady) {
+                try {
+                    youtubePlayer.pauseVideo();
+                    console.log("⏸️ Pause");
+                } catch (err) {
+                    console.error("Error pausing:", err);
                 }
             }
         });
-        console.log("✅ YouTube player created successfully");
-    } catch (err) {
-        console.error("Error creating YouTube player:", err);
-        alert("Error creating YouTube player. Check console.");
+    }
+    
+    if (stopBtn) {
+        stopBtn.addEventListener("click", () => {
+            if (youtubePlayer && playerReady) {
+                try {
+                    youtubePlayer.stopVideo();
+                    console.log("⏹️ Stop");
+                } catch (err) {
+                    console.error("Error stopping:", err);
+                }
+            }
+        });
+    }
+    
+    console.log("✅ Music controls configured");
+}
+
+function parseYouTubeUrl(url) {
+    try {
+        // Si es solo un ID de 11 caracteres
+        if (/^[A-Za-z0-9_-]{11}$/.test(url.trim())) {
+            return { type: "video", id: url.trim() };
+        }
+        
+        const u = new URL(url);
+        const host = u.hostname.replace(/^www\./, "").toLowerCase();
+        
+        // youtu.be/VIDEOID
+        if (host === "youtu.be") {
+            const id = u.pathname.slice(1).split(/[/?#]/)[0];
+            if (/^[A-Za-z0-9_-]{11}$/.test(id)) {
+                return { type: "video", id };
+            }
+        }
+        
+        // youtube.com
+        if (host.endsWith("youtube.com")) {
+            // Playlist
+            const list = u.searchParams.get("list");
+            if (list) {
+                return { type: "playlist", id: list };
+            }
+            
+            // Video watch?v=
+            const v = u.searchParams.get("v");
+            if (v && /^[A-Za-z0-9_-]{11}$/.test(v)) {
+                return { type: "video", id: v };
+            }
+            
+            // /embed/ID
+            const embedMatch = u.pathname.match(/\/embed\/([^/?#]+)/);
+            if (embedMatch && /^[A-Za-z0-9_-]{11}$/.test(embedMatch[1])) {
+                return { type: "video", id: embedMatch[1] };
+            }
+        }
+        
+        return null;
+    } catch (e) {
+        return null;
     }
 }
