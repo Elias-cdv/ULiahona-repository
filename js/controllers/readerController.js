@@ -364,7 +364,14 @@ function showChapterContent(bookName, chapterData) {
                 <button id="mark-complete-btn" class="nav-btn complete-btn">Mark as complete</button>
             </div>
         `;
+
+        // Agregar funcionalidad a los botones
+        setupNavigationButtons();
         
+        //restaurar highlights
+        setTimeout(() => {
+            restoreHighlights();
+        }, 0);
         // ===== 9. CREAR EL HTML DE TODOS LOS VERSÍCULOS =====
         let versesHTML = navigationHTML; // Botones arriba
         
@@ -744,15 +751,206 @@ function setupNotesAutosave() {
         });
     }
 }
+//===========================
+//   HIGHLIGHTER FUNCTIONALITY
+//===========================
 
-// ===== HIGHLIGHTER (placeholder) =====
+let selectedColor = null;
+
 function setupHighlighter() {
-    console.log("🖍️ Highlighter setup - will implement next");
-    // TO DO: Implementar en la siguiente sesión
+    console.log("🖍️ Highlighter initialized");
+
+    // Setup color buttons
+    const colorButtons = document.querySelectorAll(".color-btn"); // ← CORREGIDO: "document"
+    
+    colorButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            selectedColor = btn.dataset.color;
+
+            // Visual feedback - border around selected color
+            colorButtons.forEach(b => b.style.border = "3px solid transparent");
+            btn.style.border = "3px solid var(--deep-blue)";
+
+            console.log("✅ Color selected:", selectedColor);
+            alert(`🖍️ ${selectedColor.toUpperCase()} highlighter activated! Now select text in the scripture.`);
+        });
+    });
+
+    // Setup clear button
+    const clearBtn = document.getElementById("clear-highlights-btn");
+    if (clearBtn) {
+        clearBtn.addEventListener("click", clearAllHighlights);
+    }
+
+    // Setup text selection listener
+    setupTextSelectionListener();
+    
+    console.log("✅ Highlighter fully configured");
+}
+
+function setupTextSelectionListener() {
+    document.addEventListener("mouseup", () => {
+        // Check if a color is selected
+        if (!selectedColor) return;
+
+        // Get selection
+        const selection = window.getSelection(); // ← CORREGIDO
+        
+        // Check if there's actual text selected
+        if (!selection || selection.toString().trim() === "") return;
+        
+        // Verify selection is within scripture content
+        const scriptureContent = document.getElementById("scripture-content");
+        if (!scriptureContent) return;
+
+        // Get range
+        const range = selection.getRangeAt(0); // ← CORREGIDO
+        const container = range.commonAncestorContainer;
+
+        // Find parent verse element
+        let verseElement = container.nodeType === 3 ? container.parentElement : container;
+        
+        while (verseElement && !verseElement.classList.contains("verse")) {
+            verseElement = verseElement.parentElement;
+            if (verseElement === scriptureContent || !verseElement) break;
+        }
+
+        if (!verseElement || !verseElement.classList.contains("verse")) {
+            console.log("⚠️ Selection not in a verse");
+            return;
+        }
+
+        // Apply highlight
+        applyHighlight(range, verseElement);
+
+        // Clear selection
+        selection.removeAllRanges(); // ← CORREGIDO: "Ranges" con R mayúscula
+    });
+}
+
+function applyHighlight(range, verseElement) {
+    try {
+        // Create highlight span
+        const highlight = document.createElement("span");
+        highlight.className = `highlight highlight-${selectedColor}`;
+        highlight.dataset.color = selectedColor;
+
+        // Wrap selected text
+        range.surroundContents(highlight);
+
+        console.log("✅ Highlight applied:", selectedColor);
+
+        // Save highlight
+        saveHighlight(verseElement, selectedColor); // ← CORREGIDO: sin mayúscula
+        
+    } catch (error) {
+        console.error("❌ Error applying highlight:", error);
+        alert("⚠️ Cannot highlight this selection. Try selecting text within a single verse only.");
+    }
+}
+
+function saveHighlight(verseElement, color) {
+    if (!currentScripture.name || currentScripture.currentBookIndex === null) {
+        console.warn("⚠️ Cannot save highlight - no chapter selected");
+        return;
+    }
+    
+    // Create unique ID for this chapter
+    let chapterId;
+    if (currentScripture.structureType === "books") {
+        const currentBook = currentScripture.data.books[currentScripture.currentBookIndex];
+        const currentChapter = currentBook.chapters[currentScripture.currentChapterIndex];
+        chapterId = `${currentBook.book}-${currentChapter.chapter}`;
+    } else {
+        const currentSection = currentScripture.data.sections[currentScripture.currentBookIndex];
+        chapterId = `section-${currentSection.section}`;
+    }
+    
+    // Get verse number
+    const verseNum = verseElement.querySelector("strong")?.textContent || "unknown";
+    
+    // Get highlights storage
+    const highlights = JSON.parse(localStorage.getItem("scripture-highlights") || "{}");
+    
+    // Initialize if needed
+    if (!highlights[currentScripture.name]) {
+        highlights[currentScripture.name] = {};
+    }
+    if (!highlights[currentScripture.name][chapterId]) {
+        highlights[currentScripture.name][chapterId] = {};
+    }
+    
+    // Save current HTML of verse (preserves all highlights)
+    highlights[currentScripture.name][chapterId][verseNum] = verseElement.innerHTML;
+    
+    // Save to localStorage
+    localStorage.setItem("scripture-highlights", JSON.stringify(highlights));
+    
+    console.log("💾 Highlight saved for", chapterId, "verse", verseNum);
+}
+
+function restoreHighlights() {
+    if (!currentScripture.name || currentScripture.currentBookIndex === null) {
+        console.log("⚠️ No scripture loaded, skipping highlights restore");
+        return;
+    }
+    
+    // Create chapter ID
+    let chapterId;
+    if (currentScripture.structureType === "books") {
+        if (currentScripture.currentChapterIndex === null) return;
+        const currentBook = currentScripture.data.books[currentScripture.currentBookIndex];
+        const currentChapter = currentBook.chapters[currentScripture.currentChapterIndex];
+        chapterId = `${currentBook.book}-${currentChapter.chapter}`;
+    } else {
+        const currentSection = currentScripture.data.sections[currentScripture.currentBookIndex];
+        chapterId = `section-${currentSection.section}`;
+    }
+    
+    // Get highlights
+    const highlights = JSON.parse(localStorage.getItem("scripture-highlights") || "{}");
+    
+    if (!highlights[currentScripture.name] || !highlights[currentScripture.name][chapterId]) {
+        console.log("📝 No highlights to restore for this chapter");
+        return;
+    }
+    
+    const chapterHighlights = highlights[currentScripture.name][chapterId];
+    
+    // Apply highlights
+    Object.keys(chapterHighlights).forEach(verseNum => {
+        const verseElements = document.querySelectorAll(".verse");
+        verseElements.forEach(verse => {
+            const verseNumber = verse.querySelector("strong")?.textContent;
+            if (verseNumber === verseNum) {
+                verse.innerHTML = chapterHighlights[verseNum];
+                console.log("✅ Restored highlight for verse", verseNum);
+            }
+        });
+    });
+    
+    console.log("✅ All highlights restored for this chapter");
+}
+
+function clearAllHighlights() {
+    if (!confirm("🗑️ Are you sure you want to clear ALL highlights from ALL scriptures?")) {
+        return;
+    }
+    
+    localStorage.removeItem("scripture-highlights");
+    
+    // Remove highlights from current page
+    document.querySelectorAll(".highlight").forEach(el => {
+        const text = el.textContent;
+        const textNode = document.createTextNode(text);
+        el.replaceWith(textNode);
+    });
+    
+    console.log("✅ All highlights cleared");
+    alert("✅ All highlights have been cleared!");
 }
 
 // ===== PROGRESS TRACKING =====
-
 function setupProgress() {
     console.log("📊 Progress tracking initialized");
     updateProgressDisplay();
