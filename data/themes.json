@@ -1,0 +1,168 @@
+{
+  "themes": {
+    "faith": [
+      {
+        "scripture": "Old Testament",
+        "book": "Proverbs",
+        "chapter": 3,
+        "verse": 5,
+        "reference": "Proverbs 3:5",
+        "text": "Trust in the Lord with all thine heart; and lean not unto thine own understanding."
+      },
+      {
+        "scripture": "Old Testament",
+        "book": "Isaiah",
+        "chapter": 40,
+        "verse": 31,
+        "reference": "Isaiah 40:31",
+        "text": "But they that wait upon the Lord shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary; and they shall walk, and not faint."
+      },
+      {
+        "scripture": "New Testament",
+        "book": "Hebrews",
+        "chapter": 11,
+        "verse": 1,
+        "reference": "Hebrews 11:1",
+        "text": "Now faith is the substance of things hoped for, the evidence of things not seen."
+      },
+      {
+        "scripture": "New Testament",
+        "book": "Mark",
+        "chapter": 9,
+        "verse": 23,
+        "reference": "Mark 9:23",
+        "text": "Jesus said unto him, If thou canst believe, all things are possible to him that believeth."
+      },
+      {
+        "scripture": "Book of Mormon",
+        "book": "Alma",
+        "chapter": 32,
+        "verse": 21,
+        "reference": "Alma 32:21",
+        "text": "And now as I said concerning faith—faith is not to have a perfect knowledge of things; therefore if ye have faith ye hope for things which are not seen, which are true."
+      },
+      {
+        "scripture": "Book of Mormon",
+        "book": "Ether",
+        "chapter": 12,
+        "verse": 6,
+        "reference": "Ether 12:6",
+        "text": "And now, I, Moroni, would speak somewhat concerning these things; I would show unto the world that faith is things which are hoped for and not seen; wherefore, dispute not because ye see not, for ye receive no witness until after the trial of your faith."
+      },
+      {
+        "scripture": "Doctrine & Covenants",
+        "book": "D&C",
+        "chapter": 76,
+        "verse": 22,
+        "reference": "D&C 76:22",
+        "text": "And now, after the many testimonies which have been given of him, this is the testimony, last of all, which we give of him: That he lives!"
+      },
+      {
+        "scripture": "Doctrine & Covenants",
+        "book": "D&C",
+        "chapter": 88,
+        "verse": 118,
+        "reference": "D&C 88:118",
+        "text": "And as all have not faith, seek ye diligently and teach one another words of wisdom; yea, seek ye out of the best books words of wisdom; seek learning, even by study and also by faith."
+      },
+      {
+        "scripture": "Pearl of Great Price",
+        "book": "Moses",
+        "chapter": 1,
+        "verse": 39,
+        "reference": "Moses 1:39",
+        "text": "For behold, this is my work and my glory—to bring to pass the immortality and eternal life of man."
+      },
+      {
+        "scripture": "Pearl of Great Price",
+        "book": "Articles of Faith",
+        "chapter": 1,
+        "verse": 4,
+        "reference": "Articles of Faith 1:4",
+        "text": "We believe that the first principles and ordinances of the Gospel are: first, Faith in the Lord Jesus Christ; second, Repentance; third, Baptism by immersion for the remission of sins; fourth, Laying on of hands for the gift of the Holy Ghost."
+      }
+    ],
+    "prayer": [
+      {
+        "scripture": "Old Testament",
+        "book": "Psalms",
+        "chapter": 145,
+        "verse": 18,
+        "reference": "Psalms 145:18",
+        "text": "The Lord is nigh unto all them that call upon him, to all that call upon him in truth."
+      },
+      {
+        "scripture": "Old Testament",
+        "book": "Jeremiah",
+        "chapter": 29,
+        "verse": 12,
+        "reference": "Jeremiah 29:12",
+        "text": "Then shall ye call upon me, and ye shall go and pray unto me, and I will hearken unto you."
+      },
+      {
+        "scripture": "New Testament",
+        "book": "Matthew",
+        "chapter": 6,
+        "verse": 6,
+        "reference": "Matthew 6:6",
+        "text": "But thou, when thou prayest, enter into thy closet, and when thou hast shut thy door, pray to thy Father which is in secret; and thy Father which seeth in secret shall reward thee openly."
+      },
+      {
+        "scripture": "New Testament",
+        "book": "James",
+        "chapter": 1,
+        "verse": 5,
+        "reference": "James 1:5",
+        "text": "If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him."
+      },
+      {
+        "scripture": "Book of Mormon",
+        "book": "2 Nephi",
+        "chapter": 32,
+        "verse": 9,
+        "reference": "2 Nephi 32:9",
+        "text": "But behold, I say unto you that ye must pray always, and not faint; that ye must not perform any thing unto the Lord save in the first place ye shall pray unto the Father in the name of Christ, that he will consecrate thy performance unto thee, that thy performance may be for the welfare of thy soul."
+      },
+      {
+        "scripture": "Book of Mormon",
+        "book": "Alma",
+        "chapter": 34,
+        "verse": 27,
+        "reference": "Alma 34:27",
+        "text": "Yea, and when you do not cry unto the Lord, let your hearts be full, drawn out in prayer unto him continually for your welfare, and also for the welfare of those who are around you."
+      },
+      {
+        "scripture": "Doctrine & Covenants",
+        "book": "D&C",
+        "chapter": 112,
+        "verse": 10,
+        "reference": "D&C 112:10",
+        "text": "Be thou humble; and the Lord thy God shall lead thee by the hand, and give thee answer to thy prayers."
+      },
+      {
+        "scripture": "Doctrine & Covenants",
+        "book": "D&C",
+        "chapter": 19,
+        "verse": 38,
+        "reference": "D&C 19:38",
+        "text": "Pray always, and I will pour out my Spirit upon you, and great shall be your blessing—yea, even more than if you should obtain treasures of earth and corruptibleness to the extent thereof."
+      },
+      {
+        "scripture": "Pearl of Great Price",
+        "book": "Joseph Smith—History",
+        "chapter": 1,
+        "verse": 13,
+        "reference": "Joseph Smith—History 1:13",
+        "text": "I saw a pillar of light exactly over my head, above the brightness of the sun, which descended gradually until it fell upon me."
+      },
+      {
+        "scripture": "Pearl of Great Price",
+        "book": "Joseph Smith—History",
+        "chapter": 1,
+        "verse": 15,
+        "reference": "Joseph Smith—History 1:15",
+        "text": "When the light rested upon me I saw two Personages, whose brightness and glory defy all description, standing above me in the air. One of them spake unto me, calling me by name and said, pointing to the other—This is My Beloved Son. Hear Him!"
+      }
+    ]
+  }
+}
