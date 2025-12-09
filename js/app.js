@@ -23,6 +23,7 @@
 import { initHome } from "./controllers/homeController.js";
 import { initReader } from "./controllers/readerController.js";
 import { initSettings } from "./controllers/settingsController.js";
+import { initSearch } from "./controllers/searchingController.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     console.log("DOMContentLoaded fired — checking page for init...");
@@ -50,7 +51,16 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error running initReader:", err);
         }
     }
-
+    // Detectar SEARCH
+    const hasSearch = !!document.querySelector(".search-content");
+    if (hasSearch) {
+        try {
+            initSearch();
+            console.log("initSearch() invoked");
+        } catch (err) {
+            console.error("Error running initSearch:", err);
+        }
+    }
     // Detectar SETTINGS
     const hasSettings = !!document.querySelector(".settings-content");
     if (hasSettings) {
@@ -62,3 +72,4 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 });
+
