@@ -147,3 +147,60 @@
     50% { transform: scale(1.08); }
     100% { transform: scale(1); }
 }
+/* ===================================
+   DARK MODE - HOME MEJORADO
+   =================================== */
+
+body.dark #progress-section,
+body.dark #quote-section,
+body.dark #choose-scripture {
+    background: rgba(30, 30, 30, 0.95);
+}
+
+body.dark .progress-card {
+    background: rgba(40, 40, 40, 0.9);
+    border: 1px solid #555;
+}
+body.dark .progress-area p {
+    color: var(--text-light);
+}
+body.dark .progress-fill {
+    background: linear-gradient(90deg, var(--gold), #C49B33);
+}
+
+body.dark .quote-card {
+    background: rgba(40, 40, 40, 0.9);
+    border: 1px solid #555;
+}
+
+body.dark .quote-card blockquote {
+    color: var(--text-light);
+}
+
+body.dark .quote-author {
+    color: #aaa;
+}
+
+body.dark .book-card {
+    background: rgba(40, 40, 40, 0.9);
+    border: 1px solid #555;
+}
+
+body.dark .book-card:hover {
+    border-color: var(--gold);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+body.dark .book-name {
+    color: var(--gold);
+}
+
+body.dark .no-book,
+body.dark .hint,
+body.dark .motivation {
+    color: var(--text-light);
+}
+
+body.dark h2 {
+    color: var(--gold);
+}
