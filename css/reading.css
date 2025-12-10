@@ -813,13 +813,13 @@ body.dark .highlight-pink {
 }
 
 .music-btn {
-    padding: 0.75rem 1.5rem;
+    padding: 0.6rem 1.5rem;
     background: linear-gradient(135deg, var(--gold), #C49B33);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     font-family: var(--body-font);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition-smooth);
