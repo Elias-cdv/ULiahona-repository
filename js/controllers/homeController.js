@@ -70,45 +70,54 @@ export function initHome(){
     }
 
     const scriptures = [
-        { file: "old-testament.json", name: "", img: "assets/images/ot.png"},
-        { file: "new-testament.json", name: "", img: "assets/images/nt.png"},
-        { file: "book-of-mormon.json", name: "", img: "assets/images/bom.png"},
-        { file: "doctrine-and-covenants.json", name: "", img: "assets/images/dyc.png"},
-        { file: "pearl-of-great-price.json", name: "", img: "assets/images/pgp.png"},
+        { file: "old-testament.json", name: "Old Testament", img: "assets/images/ot.png"},
+        { file: "new-testament.json", name: "New Testament", img: "assets/images/nt.png"},
+        { file: "book-of-mormon.json", name: "Book of Mormon", img: "assets/images/bom.png"},
+        { file: "doctrine-and-covenants.json", name: "Doctrine and Covenants", img: "assets/images/dyc.png"},
+        { file: "pearl-of-great-price.json", name: "Pearl of great price", img: "assets/images/pgp.png"},
     ];
 
     // limpiar contenido previo
     chooseContainer.innerHTML = "";
-
+    
     scriptures.forEach(scr => {
         const card = createBookCard(scr.name, scr.img);
 
         card.addEventListener("click", async () => {
             try {
-                saveProgress({
-                    book: scr.name,
+                // ===== FIX: Guardar con nombre correcto =====
+                const progressData = {
+                    book: scr.name,  // ← Asegurar que scr.name tenga valor
+                    file: scr.file,
                     chapter: 1,
                     verse: 1,
                     percentage: 0
-                });
+                };
+                
+                saveProgress(progressData);
+            
+                console.log("✅ Saved progress for:", scr.name, progressData);
+            
+                // ===== ACTUALIZAR UI INMEDIATAMENTE =====
                 progressSection.innerHTML = `
                     <h2>Progress of Study</h2>
                     <p><strong>Selected scripture:</strong> ${scr.name}</p>
                     <div class="progress-card">
-                        <div class="progress-bar" aria-hidden="true">
+                        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                             <div class="progress-fill" style="width:0%"></div>
                         </div>
                         <div class="progress-meta"><span class="progress-percent">0%</span></div>
                     </div>
-                    <p class="motivation">Keep going, you're doing great!</p>
+                    <p class="motivation">Great! Start reading to track your progress.</p>
                 `;
-                console.log("Saved progress for:", scr.name);
+            
             } catch (err) {
-                console.error("Click handler failed:", err);
-            }
-        });
+                console.error("❌ Click handler failed:", err);
+        }
+    });
 
-        chooseContainer.appendChild(card);
+    chooseContainer.appendChild(card);
+    
     });
 }
 
